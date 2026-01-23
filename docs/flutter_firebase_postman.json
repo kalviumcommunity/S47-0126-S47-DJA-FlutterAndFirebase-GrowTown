@@ -1,0 +1,130 @@
+{
+  "info": {
+    "_postman_id": "e4477309-c25f-4d5f-9f7a-6f5a1decb4bc",
+    "name": "Flutter-Firebase API Documentation",
+    "description": "App Name: GrowTown\n\nAPI Documentation for the GrowTown Flutter + Firebase mobile application.\n\nVersion: 1.0.0  \nBase URL: https://growtown.firebaseapp.com  \nAuthentication: Firebase Phone Authentication (Bearer Token)  \nLast Updated: 2026-01-23\n\nNote: API requests and responses are representative examples. Actual Firebase operations are handled via Flutter Firebase SDK.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <Firebase_ID_Token>"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phoneNumber\": \"9876543210\",\n  \"totalPoints\": 0,\n  \"createdAt\": \"2025-01-20\"\n}"
+        },
+        "url": {
+          "raw": "/firestore/customers",
+          "path": ["firestore", "customers"]
+        }
+      },
+      "response": [
+        {
+          "name": "Customer Created",
+          "status": "201 Created",
+          "code": 201,
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Customer created successfully\",\n  \"data\": {\n    \"customerId\": \"cust_12345\",\n    \"phoneNumber\": \"9876543210\",\n    \"totalPoints\": 0,\n    \"createdAt\": \"2025-01-20T10:30:00Z\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Customers List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <Firebase_ID_Token>"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "/firestore/customers",
+          "path": ["firestore", "customers"]
+        }
+      },
+      "response": [
+        {
+          "name": "Customers List",
+          "status": "200 OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"customerId\": \"cust_12345\",\n      \"phoneNumber\": \"9876543210\",\n      \"totalPoints\": 120\n    },\n    {\n      \"customerId\": \"cust_67890\",\n      \"phoneNumber\": \"9123456789\",\n      \"totalPoints\": 60\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Add Loyalty Points",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <Firebase_ID_Token>"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"purchaseAmount\": 500,\n  \"pointsAdded\": 50\n}"
+        },
+        "url": {
+          "raw": "/firestore/customers/{customerId}/points",
+          "path": ["firestore", "customers", "{customerId}", "points"]
+        }
+      },
+      "response": [
+        {
+          "name": "Points Added",
+          "status": "200 OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Loyalty points added\",\n  \"data\": {\n    \"customerId\": \"cust_12345\",\n    \"pointsAdded\": 50,\n    \"totalPoints\": 170,\n    \"updatedAt\": \"2025-01-23T14:10:00Z\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Dashboard Summary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <Firebase_ID_Token>"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "/firestore/dashboard/summary",
+          "path": ["firestore", "dashboard", "summary"]
+        }
+      },
+      "response": [
+        {
+          "name": "Dashboard Summary",
+          "status": "200 OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"totalCustomers\": 120,\n    \"activeCustomers\": 85,\n    \"totalPointsIssued\": 5400,\n    \"todayTransactions\": 18\n  }\n}"
+        }
+      ]
+    }
+  ]
+}
