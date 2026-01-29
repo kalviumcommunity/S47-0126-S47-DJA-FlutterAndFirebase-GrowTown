@@ -32,6 +32,7 @@ class _DemoBodyState extends State<DemoBody> {
   void incrementCounter() {
     setState(() {
       counter++;
+      debugPrint('Counter updated to $counter');
     });
   }
 
@@ -57,6 +58,10 @@ class _DemoBodyState extends State<DemoBody> {
         const SizedBox(height: 20),
 
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.pink, 
+          foregroundColor: Colors.white,   
+          ),
           onPressed: incrementCounter,
           child: const Text('Increase Counter'),
         ),
