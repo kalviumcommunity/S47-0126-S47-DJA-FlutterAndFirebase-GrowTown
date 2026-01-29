@@ -1,16 +1,38 @@
-# client
+# GrowTown – Multi-Screen Navigation in Flutter
 
-A new Flutter project.
+## Project Description
+GrowTown is a simple customer loyalty mobile application designed for small businesses in Tier-2 and Tier-3 towns. This task focuses on implementing multi-screen navigation in Flutter using the Navigator widget and named routes. The app demonstrates smooth screen transitions and a scalable navigation structure that will later support Firebase authentication and Firestore integration.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## Navigation Flow Overview
+The app uses Flutter’s stack-based navigation model. Screens are navigated using named routes configured in `main.dart`.
 
-A few resources to get you started if this is your first Flutter project:
+### Screens Implemented
+- Splash Screen
+- Login Screen
+- Dashboard Screen
+- Add Customer Screen
+- Profile Screen
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Navigation Flow
+Splash → Login → Dashboard  
+Dashboard → Add Customer → Back  
+Dashboard → Profile → Logout → Login
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## Route Configuration (`main.dart`)
+
+```dart
+MaterialApp(
+  debugShowCheckedModeBanner: false,
+  initialRoute: '/splash',
+  routes: {
+    '/splash': (context) => const SplashScreen(),
+    '/login': (context) => const LoginScreen(),
+    '/dashboard': (context) => const DashboardScreen(),
+    '/addCustomer': (context) => const AddCustomerScreen(),
+    '/profile': (context) => const ProfileScreen(),
+  },
+);
