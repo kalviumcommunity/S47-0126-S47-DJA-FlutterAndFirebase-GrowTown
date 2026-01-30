@@ -5,6 +5,7 @@ import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/add_customer_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/responsive_layout.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardScreen(),
         '/addCustomer': (context) => const AddCustomerScreen(),
         '/profile': (context) => const ProfileScreen(),
+        '/responsive': (context) => const ResponsiveLayout(),
       },
     );
   }
