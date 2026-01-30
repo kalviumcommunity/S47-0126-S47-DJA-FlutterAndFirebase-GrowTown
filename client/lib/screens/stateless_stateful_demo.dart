@@ -11,9 +11,7 @@ class StatelessStatefulDemo extends StatelessWidget {
         title: const Text('Stateless vs Stateful Demo'),
         centerTitle: true,
       ),
-      body: const Center(
-        child: DemoBody(),
-      ),
+      body: const Center(child: DemoBody()),
     );
   }
 }
@@ -50,17 +48,14 @@ class _DemoBodyState extends State<DemoBody> {
         const SizedBox(height: 20),
 
         // STATEFUL TEXT (DYNAMIC)
-        Text(
-          'Counter Value: $counter',
-          style: const TextStyle(fontSize: 18),
-        ),
+        Text('Counter Value: $counter', style: const TextStyle(fontSize: 18)),
 
         const SizedBox(height: 20),
 
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.pink, 
-          foregroundColor: Colors.white,   
+            backgroundColor: Colors.purple,
+            foregroundColor: Colors.white,
           ),
           onPressed: incrementCounter,
           child: const Text('Increase Counter'),

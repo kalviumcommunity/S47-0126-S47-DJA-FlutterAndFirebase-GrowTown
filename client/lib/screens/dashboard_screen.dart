@@ -14,7 +14,13 @@ class DashboardScreen extends StatelessWidget {
               Navigator.pushNamed(context, '/profile');
             },
             icon: const Icon(Icons.person),
-          )
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/responsive');
+            },
+            icon: const Icon(Icons.grid_view),
+          ),
         ],
       ),
       body: const Center(
