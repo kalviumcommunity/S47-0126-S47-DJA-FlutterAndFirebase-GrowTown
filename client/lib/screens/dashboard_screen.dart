@@ -23,10 +23,22 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text(
-          'Customer List Will Appear Here',
-          style: TextStyle(fontSize: 16),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Customer List Will Appear Here',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/stateDemo');
+              },
+              child: const Text('State Management Demo'),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
