@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/widgets/customer_list.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -15,30 +16,92 @@ class DashboardScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.person),
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/responsive');
-            },
-            icon: const Icon(Icons.grid_view),
-          ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Customer List Will Appear Here',
-              style: TextStyle(fontSize: 16),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SizedBox(
+                height: 560,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        height: 84,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Customers',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(fontSize: 20),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Manage your customers from the dashboard',
+                                    style: const TextStyle(
+                                      color: Colors.black54,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                // debug to ensure tap is registered
+                                // ignore: avoid_print
+                                print('Add Customer pressed');
+                                Navigator.pushNamed(context, '/addCustomer');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(120, 44),
+                              ),
+                              icon: const Icon(Icons.add),
+                              label: const Text('Add Customer'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: SizedBox(
+                            child: Column(
+                              children: const [Expanded(child: CustomerList())],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/stateDemo');
-              },
-              child: const Text('State Management Demo'),
-            ),
-          ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

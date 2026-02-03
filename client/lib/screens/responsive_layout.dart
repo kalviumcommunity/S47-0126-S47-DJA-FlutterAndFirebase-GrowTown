@@ -1,18 +1,5 @@
 import 'package:flutter/material.dart';
-
-class Customer {
-  final String name;
-  final int points;
-  final String phone;
-  final String status; // 'active' or 'inactive'
-
-  Customer({
-    required this.name,
-    required this.points,
-    required this.phone,
-    required this.status,
-  });
-}
+import 'package:client/models/customer.dart';
 
 class ResponsiveLayout extends StatefulWidget {
   const ResponsiveLayout({super.key});
