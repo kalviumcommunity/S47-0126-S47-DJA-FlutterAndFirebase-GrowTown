@@ -28,12 +28,15 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
-                _sideItem(Icons.dashboard, "Dashboard", true),
-                _sideItem(Icons.people, "Customers", false),
-                _sideItem(Icons.bar_chart, "Analytics", false),
-                _sideItem(Icons.settings, "Settings", false),
+
+                _sideItem(context, Icons.dashboard, "Dashboard", true),
+                _sideItem(context, Icons.people, "Customers", false),
+                _sideItem(context, Icons.bar_chart, "Analytics", false),
+                _sideItem(context, Icons.settings, "Settings", false),
+
                 const Spacer(),
-                _sideItem(Icons.logout, "Logout", false),
+
+                _sideItem(context, Icons.logout, "Logout", false),
               ],
             ),
           ),
@@ -107,37 +110,72 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, "/addCustomer");
+      // ================= Animated FAB =================
+      floatingActionButton: StatefulBuilder(
+        builder: (context, setState) {
+          bool pressed = false;
+
+          return GestureDetector(
+            onTapDown: (_) {
+              setState(() => pressed = true);
+            },
+            onTapUp: (_) {
+              setState(() => pressed = false);
+              Navigator.pushNamed(context, "/addCustomer");
+            },
+            onTapCancel: () {
+              setState(() => pressed = false);
+            },
+            child: AnimatedScale(
+              scale: pressed ? 1.15 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              child: FloatingActionButton(
+                backgroundColor: const Color(0xFF2F3A8F),
+                onPressed: () {},
+                child: const Icon(Icons.add),
+              ),
+            ),
+          );
         },
-        backgroundColor: const Color(0xFF2F3A8F),
-        child: const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _sideItem(IconData icon, String title, bool active) {
-    return Container(
+  // ================= Animated Sidebar Item =================
+  Widget _sideItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    bool active,
+  ) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: active ? Colors.white24 : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white),
-          const SizedBox(width: 12),
-          Text(title, style: const TextStyle(color: Colors.white)),
-        ],
+      child: InkWell(
+        onTap: () {},
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(title, style: const TextStyle(color: Colors.white)),
+          ],
+        ),
       ),
     );
   }
 
+  // ================= Animated Stat Card =================
   Widget _statCard(String title, String value, Color color) {
     return Expanded(
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
         margin: const EdgeInsets.only(right: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
