@@ -7,108 +7,157 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/profile');
-            },
-            icon: const Icon(Icons.person),
+      backgroundColor: const Color(0xFFF4F6FA),
+
+      body: Row(
+        children: [
+          // ================= Sidebar =================
+          Container(
+            width: 240,
+            color: const Color(0xFF2F3A8F),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "ClientDash",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                _sideItem(Icons.dashboard, "Dashboard", true),
+                _sideItem(Icons.people, "Customers", false),
+                _sideItem(Icons.bar_chart, "Analytics", false),
+                _sideItem(Icons.settings, "Settings", false),
+                const Spacer(),
+                _sideItem(Icons.logout, "Logout", false),
+              ],
+            ),
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 960),
-            child: Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: SizedBox(
-                height: 560,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+
+          // ================= Main Content =================
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ===== Top Bar =====
+                  Row(
                     children: [
-                      SizedBox(
-                        height: 84,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Customers',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(fontSize: 20),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'Manage your customers from the dashboard',
-                                    style: const TextStyle(
-                                      color: Colors.black54,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                // debug to ensure tap is registered
-                                // ignore: avoid_print
-                                print('Add Customer pressed');
-                                Navigator.pushNamed(context, '/addCustomer');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(120, 44),
-                              ),
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add Customer'),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                       Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: SizedBox(
-                            child: Column(
-                              children: const [Expanded(child: CustomerList())],
+                        child: Container(
+                          height: 44,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: const TextField(
+                            decoration: InputDecoration(
+                              icon: Icon(Icons.search),
+                              hintText: "Search customers...",
+                              border: InputBorder.none,
                             ),
                           ),
                         ),
                       ),
+                      const SizedBox(width: 20),
+                      IconButton(
+                        icon: const Icon(Icons.person),
+                        onPressed: () {
+                          Navigator.pushNamed(context, "/profile");
+                        },
+                      ),
                     ],
                   ),
-                ),
+
+                  const SizedBox(height: 24),
+
+                  // ===== Dashboard Cards =====
+                  Row(
+                    children: [
+                      _statCard("Total Customers", "150", Colors.blue),
+                      _statCard("Active", "98", Colors.green),
+                      _statCard("Inactive", "52", Colors.orange),
+                      _statCard("Top Points", "200", Colors.purple),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ===== Customers Section =====
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const CustomerList(),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ),
+        ],
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/addCustomer');
+          Navigator.pushNamed(context, "/addCustomer");
         },
+        backgroundColor: const Color(0xFF2F3A8F),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _sideItem(IconData icon, String title, bool active) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: active ? Colors.white24 : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white),
+          const SizedBox(width: 12),
+          Text(title, style: const TextStyle(color: Colors.white)),
+        ],
+      ),
+    );
+  }
+
+  Widget _statCard(String title, String value, Color color) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: TextStyle(color: color)),
+            const SizedBox(height: 10),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
