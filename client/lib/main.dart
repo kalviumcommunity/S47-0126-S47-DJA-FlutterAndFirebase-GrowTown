@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/add_customer_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/scrollable_views.dart'; // ✅ NEW IMPORT
+import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
 import 'screens/create_account_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
