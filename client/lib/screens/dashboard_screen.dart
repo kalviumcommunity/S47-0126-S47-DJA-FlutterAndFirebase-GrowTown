@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:client/widgets/customer_list.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -36,7 +37,18 @@ class DashboardScreen extends StatelessWidget {
 
                 const Spacer(),
 
-                _sideItem(context, Icons.logout, "Logout", false),
+                _sideItem(
+                  context,
+                  Icons.logout,
+                  "Logout",
+                  false,
+                  onTap: () async {
+                    await FirebaseAuth.instance.signOut();
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, '/login');
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -146,8 +158,9 @@ class DashboardScreen extends StatelessWidget {
     BuildContext context,
     IconData icon,
     String title,
-    bool active,
-  ) {
+    bool active, {
+    VoidCallback? onTap,
+  }) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -158,7 +171,7 @@ class DashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(
-        onTap: () {},
+        onTap: onTap ?? () {},
         child: Row(
           children: [
             Icon(icon, color: Colors.white),
