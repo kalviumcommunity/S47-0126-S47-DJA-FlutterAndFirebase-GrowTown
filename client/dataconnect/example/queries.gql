@@ -1,0 +1,26 @@
+mutation AddCustomer($name: String!, $email: String!, $createdAt: Timestamp!) @auth(level: USER) {
+  customer_insert(data: {name: $name, email: $email, createdAt: $createdAt})
+}
+
+query GetCustomer($id: UUID!) @auth(level: USER) {
+  customer(id: $id) {
+    id
+    name
+    email
+    address
+    phone
+  }
+}
+
+mutation UpdateInteraction($id: UUID!, $summary: String!) @auth(level: USER) {
+  interaction_update(id: $id, data: {summary: $summary})
+}
+
+query ListProducts @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  products {
+    id
+    name
+    description
+    price
+  }
+}

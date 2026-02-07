@@ -1,0 +1,40 @@
+mutation SeedDatabase @transaction @auth(level: USER_ANON) {
+  user_insertMany(
+    data: [
+      {
+        id: "67890-fedc-ba98-7654-3210abcdef01",
+        createdAt: "2024-04-27T12:00:00Z",
+        displayName: "Seed User 1",
+        email: "seed1@example.com"
+      }
+      {
+        id: "fedcba98-7654-3210-abcd-ef0123456789",
+        createdAt: "2024-04-27T13:00:00Z",
+        displayName: "Seed User 2",
+        email: "seed2@example.com"
+      }
+    ]
+  )
+  customer_insertMany(
+    data: [
+      {
+        id: "abcdef01-2345-6789-fedc-ba9876543210",
+        name: "Seed Customer 1",
+        createdAt: "2024-04-27T14:00:00Z",
+        email: "customer1@example.com"
+      }
+      {
+        id: "123456789-0fed-cba9-8765-43210abcdef",
+        name: "Seed Customer 2",
+        createdAt: "2024-04-27T15:00:00Z",
+        email: "customer2@example.com"
+      }
+    ]
+  )
+  product_insertMany(
+    data: [
+      { id: "987654321-0abc-def1-2345-67890fedcba", name: "Seed Product 1", price: 19.99 }
+      { id: "0abcdef1-2345-6789-0abc-def1234567890", name: "Seed Product 2", price: 29.99 }
+    ]
+  )
+}

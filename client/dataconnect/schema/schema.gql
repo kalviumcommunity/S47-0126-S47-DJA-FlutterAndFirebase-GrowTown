@@ -1,0 +1,40 @@
+type User @table {
+  displayName: String!
+  email: String!
+  createdAt: Timestamp!
+  photoUrl: String
+}
+
+type Customer @table {
+  name: String!
+  createdAt: Timestamp!
+  email: String
+  phone: String
+  address: String
+  status: String
+  notes: String
+}
+
+type Interaction @table {
+  interactionType: String!
+  interactionDate: Timestamp!
+  summary: String!
+  details: String
+  user: User
+  customer: Customer
+}
+
+type Product @table {
+  name: String!
+  price: Float!
+  description: String
+}
+
+type Purchase @table {
+  purchaseDate: Timestamp!
+  quantity: Int!
+  totalAmount: Float
+  notes: String
+  customer: Customer
+  product: Product
+}
