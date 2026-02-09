@@ -11,9 +11,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // Show splash for 2 seconds then navigate to AuthWrapper
+    // AuthWrapper will handle routing to correct screen based on login state
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.pushReplacementNamed(context, '/auth');
       }
     });
   }
