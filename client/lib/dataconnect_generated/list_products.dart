@@ -59,7 +59,7 @@ class ListProductsProducts {
     return json;
   }
 
-  ListProductsProducts({
+  const ListProductsProducts({
     required this.id,
     required this.name,
     this.description,
@@ -98,7 +98,7 @@ class ListProductsData {
     return json;
   }
 
-  ListProductsData({
+  const ListProductsData({
     required this.products,
   });
 }

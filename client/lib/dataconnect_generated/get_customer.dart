@@ -68,7 +68,7 @@ class GetCustomerCustomer {
     return json;
   }
 
-  GetCustomerCustomer({
+  const GetCustomerCustomer({
     required this.id,
     required this.name,
     this.email,
@@ -108,7 +108,7 @@ class GetCustomerData {
     return json;
   }
 
-  GetCustomerData({
+  const GetCustomerData({
     this.customer,
   });
 }
@@ -143,7 +143,7 @@ class GetCustomerVariables {
     return json;
   }
 
-  GetCustomerVariables({
+  const GetCustomerVariables({
     required this.id,
   });
 }
