@@ -136,8 +136,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (confirm == true) {
       await FirebaseAuth.instance.signOut();
+      // No need to manually navigate - AuthWrapper will detect signOut
+      // and automatically redirect to LoginScreen
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      // Navigate to AuthWrapper which will handle routing
+      Navigator.pushNamedAndRemoveUntil(context, '/auth', (route) => false);
     }
   }
 

@@ -65,7 +65,7 @@ class DashboardScreen extends StatelessWidget {
                     onTap: () async {
                       await FirebaseAuth.instance.signOut();
                       if (context.mounted) {
-                        Navigator.pushReplacementNamed(context, '/login');
+                        Navigator.pushReplacementNamed(context, '/auth');
                       }
                     },
                   ),
@@ -192,7 +192,7 @@ class DashboardScreen extends StatelessWidget {
                 onTap: () async {
                   await FirebaseAuth.instance.signOut();
                   if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, '/login');
+                    Navigator.pushReplacementNamed(context, '/auth');
                   }
                 },
               ),
