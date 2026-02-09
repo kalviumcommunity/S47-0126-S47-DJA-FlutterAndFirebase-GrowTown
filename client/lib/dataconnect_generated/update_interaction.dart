@@ -47,17 +47,17 @@ class UpdateInteractionInteractionUpdate {
     return json;
   }
 
-  UpdateInteractionInteractionUpdate({
+  const UpdateInteractionInteractionUpdate({
     required this.id,
   });
 }
 
 @immutable
 class UpdateInteractionData {
-  final UpdateInteractionInteractionUpdate? interaction_update;
+  final UpdateInteractionInteractionUpdate? interactionUpdate;
   UpdateInteractionData.fromJson(dynamic json):
   
-  interaction_update = json['interaction_update'] == null ? null : UpdateInteractionInteractionUpdate.fromJson(json['interaction_update']);
+  interactionUpdate = json['interaction_update'] == null ? null : UpdateInteractionInteractionUpdate.fromJson(json['interaction_update']);
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -68,23 +68,23 @@ class UpdateInteractionData {
     }
 
     final UpdateInteractionData otherTyped = other as UpdateInteractionData;
-    return interaction_update == otherTyped.interaction_update;
+    return interactionUpdate == otherTyped.interactionUpdate;
     
   }
   @override
-  int get hashCode => interaction_update.hashCode;
+  int get hashCode => interactionUpdate.hashCode;
   
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
-    if (interaction_update != null) {
-      json['interaction_update'] = interaction_update!.toJson();
+    if (interactionUpdate != null) {
+      json['interaction_update'] = interactionUpdate!.toJson();
     }
     return json;
   }
 
-  UpdateInteractionData({
-    this.interaction_update,
+  const UpdateInteractionData({
+    this.interactionUpdate,
   });
 }
 
@@ -122,7 +122,7 @@ class UpdateInteractionVariables {
     return json;
   }
 
-  UpdateInteractionVariables({
+  const UpdateInteractionVariables({
     required this.id,
     required this.summary,
   });

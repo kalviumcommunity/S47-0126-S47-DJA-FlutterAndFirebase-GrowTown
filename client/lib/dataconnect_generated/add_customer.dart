@@ -48,17 +48,17 @@ class AddCustomerCustomerInsert {
     return json;
   }
 
-  AddCustomerCustomerInsert({
+  const AddCustomerCustomerInsert({
     required this.id,
   });
 }
 
 @immutable
 class AddCustomerData {
-  final AddCustomerCustomerInsert customer_insert;
+  final AddCustomerCustomerInsert customerInsert;
   AddCustomerData.fromJson(dynamic json):
   
-  customer_insert = AddCustomerCustomerInsert.fromJson(json['customer_insert']);
+  customerInsert = AddCustomerCustomerInsert.fromJson(json['customer_insert']);
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -69,21 +69,21 @@ class AddCustomerData {
     }
 
     final AddCustomerData otherTyped = other as AddCustomerData;
-    return customer_insert == otherTyped.customer_insert;
+    return customerInsert == otherTyped.customerInsert;
     
   }
   @override
-  int get hashCode => customer_insert.hashCode;
+  int get hashCode => customerInsert.hashCode;
   
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
-    json['customer_insert'] = customer_insert.toJson();
+    json['customer_insert'] = customerInsert.toJson();
     return json;
   }
 
-  AddCustomerData({
-    required this.customer_insert,
+  const AddCustomerData({
+    required this.customerInsert,
   });
 }
 
@@ -125,7 +125,7 @@ class AddCustomerVariables {
     return json;
   }
 
-  AddCustomerVariables({
+  const AddCustomerVariables({
     required this.name,
     required this.email,
     required this.createdAt,

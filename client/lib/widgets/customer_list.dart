@@ -153,7 +153,7 @@ class _CustomerListState extends State<CustomerList> {
                     )
                   : ListView.separated(
                       itemCount: _filtered.length,
-                      separatorBuilder: (_, __) => const Divider(),
+                      separatorBuilder: (context, index) => const Divider(),
                       itemBuilder: (context, index) {
                         final c = _filtered[index];
                         return Padding(
