@@ -10,6 +10,8 @@ import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
 import 'screens/create_account_screen.dart';
 import 'screens/auth_wrapper.dart';
+import 'screens/customers_screen.dart';
+import 'screens/analytics_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -103,6 +105,8 @@ class MyApp extends StatelessWidget {
         '/scrollable': (context) => const ScrollableViews(), // ✅ NEW ROUTE
         '/userForm': (context) => const UserInputForm(),
         '/createAccount': (context) => const CreateAccountScreen(),
+        '/customers': (context) => const CustomersScreen(),
+        '/analytics': (context) => const AnalyticsScreen(),
       },
     );
   }

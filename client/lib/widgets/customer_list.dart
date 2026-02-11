@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:client/models/customer.dart';
 
 class CustomerList extends StatefulWidget {
+  /// Optional: still allows injecting a static list for testing,
+  /// but normally data comes from Firestore.
   final List<Customer>? initialCustomers;
   const CustomerList({super.key, this.initialCustomers});
 
@@ -10,31 +13,13 @@ class CustomerList extends StatefulWidget {
 }
 
 class _CustomerListState extends State<CustomerList> {
-  late List<Customer> _allCustomers;
   String _searchQuery = '';
   String _filter = 'All';
   bool _isGrid = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _allCustomers = widget.initialCustomers ?? _sampleCustomers();
-  }
-
-  List<Customer> _sampleCustomers() => [
-        Customer(name: 'Asha Sharma', points: 120, phone: '9876543210', status: 'active'),
-        Customer(name: 'Ravi Kumar', points: 45, phone: '9876501234', status: 'active'),
-        Customer(name: 'Nikita Jain', points: 78, phone: '9876512345', status: 'inactive'),
-        Customer(name: 'Suresh Patil', points: 200, phone: '9876523456', status: 'active'),
-        Customer(name: 'Meena Rao', points: 15, phone: '9876534567', status: 'inactive'),
-        Customer(name: 'Tarun Mehta', points: 95, phone: '9876541234', status: 'active'),
-        Customer(name: 'Priya Singh', points: 60, phone: '9876549876', status: 'active'),
-        Customer(name: 'Vikram Das', points: 10, phone: '9876551111', status: 'inactive'),
-      ];
-
-  List<Customer> get _filtered {
+  List<Customer> _applyFilters(List<Customer> allCustomers) {
     final q = _searchQuery.toLowerCase();
-    return _allCustomers.where((c) {
+    return allCustomers.where((c) {
       final matchesQuery = c.name.toLowerCase().contains(q) || c.phone.contains(q);
       if (!matchesQuery) return false;
       if (_filter == 'All') return true;
@@ -46,151 +31,240 @@ class _CustomerListState extends State<CustomerList> {
     }).toList();
   }
 
-  int get _totalCustomers => _allCustomers.length;
-  double get _averagePoints =>
-      _allCustomers.isEmpty ? 0 : _allCustomers.map((c) => c.points).reduce((a, b) => a + b) / _allCustomers.length;
-  Customer? get _topCustomer =>
-      _allCustomers.isEmpty ? null : (_allCustomers..sort((a, b) => b.points.compareTo(a.points))).first;
+  int _totalCustomers(List<Customer> allCustomers) => allCustomers.length;
+
+  double _averagePoints(List<Customer> allCustomers) {
+    if (allCustomers.isEmpty) return 0;
+    final total = allCustomers.map((c) => c.points).fold<int>(0, (a, b) => a + b);
+    return total / allCustomers.length;
+  }
+
+  Customer? _topCustomer(List<Customer> allCustomers) {
+    if (allCustomers.isEmpty) return null;
+    final sorted = [...allCustomers]..sort((a, b) => b.points.compareTo(a.points));
+    return sorted.first;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // 🔍 Search + Filter + View Toggle
-        Row(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance.collection('customers').snapshots(),
+      builder: (context, snapshot) {
+        // Loading state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Error state
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Failed to load customers\n${snapshot.error}',
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        // Map Firestore docs -> Customer models
+        final docs = snapshot.data?.docs ?? [];
+        List<Customer> allCustomers;
+
+        if (docs.isEmpty && widget.initialCustomers != null) {
+          // Fallback: use injected sample list if Firestore is empty
+          allCustomers = widget.initialCustomers!;
+        } else {
+          allCustomers = docs.map(Customer.fromDoc).toList();
+        }
+
+        final filtered = _applyFilters(allCustomers);
+        final total = _totalCustomers(allCustomers);
+        final avgPoints = _averagePoints(allCustomers);
+        final top = _topCustomer(allCustomers);
+
+        return Column(
           children: [
-            Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: "Search by name or phone",
-                  filled: true,
-                  fillColor: const Color(0xFFF4F6FA),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
+            // 🔍 Search + Filter + View Toggle
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: "Search by name or phone",
+                      filled: true,
+                      fillColor: const Color(0xFFF4F6FA),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    onChanged: (v) => setState(() => _searchQuery = v),
                   ),
                 ),
-                onChanged: (v) => setState(() => _searchQuery = v),
+                const SizedBox(width: 12),
+                DropdownButton<String>(
+                  value: _filter,
+                  items: const [
+                    DropdownMenuItem(value: 'All', child: Text('All')),
+                    DropdownMenuItem(value: 'Points > 50', child: Text('Points > 50')),
+                    DropdownMenuItem(value: 'Points > 100', child: Text('Points > 100')),
+                    DropdownMenuItem(value: 'Active', child: Text('Active')),
+                    DropdownMenuItem(value: 'Inactive', child: Text('Inactive')),
+                  ],
+                  onChanged: (v) => setState(() => _filter = v!),
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  icon: Icon(Icons.view_list, color: !_isGrid ? Colors.blue : Colors.grey),
+                  onPressed: () => setState(() => _isGrid = false),
+                ),
+                IconButton(
+                  icon: Icon(Icons.grid_view, color: _isGrid ? Colors.blue : Colors.grey),
+                  onPressed: () => setState(() => _isGrid = true),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // 📊 Stats
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4F6FA),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Text("Total: $total"),
+                  const Spacer(),
+                  Text("Avg: ${avgPoints.toStringAsFixed(1)}"),
+                  const Spacer(),
+                  if (top != null) Text("Top: ${top.name}"),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            DropdownButton<String>(
-              value: _filter,
-              items: const [
-                DropdownMenuItem(value: 'All', child: Text('All')),
-                DropdownMenuItem(value: 'Points > 50', child: Text('Points > 50')),
-                DropdownMenuItem(value: 'Points > 100', child: Text('Points > 100')),
-                DropdownMenuItem(value: 'Active', child: Text('Active')),
-                DropdownMenuItem(value: 'Inactive', child: Text('Inactive')),
-              ],
-              onChanged: (v) => setState(() => _filter = v!),
-            ),
-            const SizedBox(width: 12),
-            IconButton(
-              icon: Icon(Icons.view_list, color: !_isGrid ? Colors.blue : Colors.grey),
-              onPressed: () => setState(() => _isGrid = false),
-            ),
-            IconButton(
-              icon: Icon(Icons.grid_view, color: _isGrid ? Colors.blue : Colors.grey),
-              onPressed: () => setState(() => _isGrid = true),
+
+            const SizedBox(height: 16),
+
+            // 🧾 Table header (only for list view)
+            if (!_isGrid)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                color: const Color(0xFFF4F6FA),
+                child: const Row(
+                  children: [
+                    Expanded(child: Text("Name")),
+                    Expanded(child: Text("Phone")),
+                    Expanded(child: Text("Points")),
+                    Expanded(child: Text("Status")),
+                  ],
+                ),
+              ),
+
+            const SizedBox(height: 8),
+
+            // 🧩 Grid or List
+            Expanded(
+              child: filtered.isEmpty
+                  ? const Center(child: Text("No customers found"))
+                  : _isGrid
+                      ? GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 1.3,
+                          ),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) {
+                            return _gridCustomerCard(filtered[index]);
+                          },
+                        )
+                      : ListView.separated(
+                          itemCount: filtered.length,
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemBuilder: (context, index) {
+                            final c = filtered[index];
+                            final canEdit = c.id.isNotEmpty;
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                children: [
+                                  Expanded(child: Text(c.name)),
+                                  Expanded(child: Text(c.phone)),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.remove, size: 18),
+                                          tooltip: 'Decrease points',
+                                          onPressed: canEdit && c.points > 0
+                                              ? () => _updatePoints(c, -1)
+                                              : null,
+                                        ),
+                                        Text('${c.points}'),
+                                        IconButton(
+                                          icon: const Icon(Icons.add, size: 18),
+                                          tooltip: 'Increase points',
+                                          onPressed: canEdit && c.points < 1000
+                                              ? () => _updatePoints(c, 1)
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Chip(
+                                          label: Text(c.status),
+                                          backgroundColor: c.status == 'active'
+                                              ? Colors.green[100]
+                                              : Colors.grey[300],
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.edit, size: 18),
+                                          tooltip: 'Edit points',
+                                          onPressed: canEdit
+                                              ? () => _editPoints(context, c)
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
             ),
           ],
-        ),
-
-        const SizedBox(height: 16),
-
-        // 📊 Stats
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: const Color(0xFFF4F6FA), borderRadius: BorderRadius.circular(12)),
-          child: Row(
-            children: [
-              Text("Total: $_totalCustomers"),
-              const Spacer(),
-              Text("Avg: ${_averagePoints.toStringAsFixed(1)}"),
-              const Spacer(),
-              if (_topCustomer != null) Text("Top: ${_topCustomer!.name}"),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // 🧾 Table header (only for list view)
-        if (!_isGrid)
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            color: const Color(0xFFF4F6FA),
-            child: const Row(
-              children: [
-                Expanded(child: Text("Name")),
-                Expanded(child: Text("Phone")),
-                Expanded(child: Text("Points")),
-                Expanded(child: Text("Status")),
-              ],
-            ),
-          ),
-
-        const SizedBox(height: 8),
-
-        // 🧩 Grid or List
-        Expanded(
-          child: _filtered.isEmpty
-              ? const Center(child: Text("No customers found"))
-              : _isGrid
-                  ? GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 1.3,
-                      ),
-                      itemCount: _filtered.length,
-                      itemBuilder: (context, index) {
-                        return _gridCustomerCard(_filtered[index]);
-                      },
-                    )
-                  : ListView.separated(
-                      itemCount: _filtered.length,
-                      separatorBuilder: (context, index) => const Divider(),
-                      itemBuilder: (context, index) {
-                        final c = _filtered[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
-                            children: [
-                              Expanded(child: Text(c.name)),
-                              Expanded(child: Text(c.phone)),
-                              Expanded(child: Text("${c.points}")),
-                              Expanded(
-                                child: Chip(
-                                  label: Text(c.status),
-                                  backgroundColor:
-                                      c.status == 'active' ? Colors.green[100] : Colors.grey[300],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-        ),
-      ],
+        );
+      },
     );
   }
 
   // 🧩 Grid Card UI
   Widget _gridCustomerCard(Customer c) {
+    final canEdit = c.id.isNotEmpty;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: const Color(0xFFF4F6FA), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F6FA),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
             backgroundColor: Colors.blue,
-            child: Text(c.name[0], style: const TextStyle(color: Colors.white)),
+            child: Text(
+              c.name.isNotEmpty ? c.name[0] : '?',
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
           const SizedBox(height: 10),
           Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -199,15 +273,134 @@ class _CustomerListState extends State<CustomerList> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("${c.points} pts"),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove, size: 18),
+                    tooltip: 'Decrease points',
+                    onPressed: canEdit && c.points > 0
+                        ? () => _updatePoints(c, -1)
+                        : null,
+                  ),
+                  Text("${c.points} pts"),
+                  IconButton(
+                    icon: const Icon(Icons.add, size: 18),
+                    tooltip: 'Increase points',
+                    onPressed: canEdit && c.points < 1000
+                        ? () => _updatePoints(c, 1)
+                        : null,
+                  ),
+                ],
+              ),
               Chip(
                 label: Text(c.status),
-                backgroundColor: c.status == 'active' ? Colors.green[100] : Colors.grey[300],
+                backgroundColor: c.status == 'active'
+                    ? Colors.green[100]
+                    : Colors.grey[300],
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _updatePoints(Customer customer, int delta) async {
+    if (customer.id.isEmpty) return;
+    final newValue = customer.points + delta;
+    if (newValue < 0 || newValue > 1000) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Points must stay between 0 and 1000'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('customers')
+          .doc(customer.id)
+          .update({'points': newValue});
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update points: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _editPoints(BuildContext context, Customer customer) async {
+    if (customer.id.isEmpty) return;
+    final controller = TextEditingController(text: customer.points.toString());
+    final formKey = GlobalKey<FormState>();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Edit points'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Points',
+              ),
+              validator: (value) {
+                final raw = (value ?? '').trim();
+                if (raw.isEmpty) return 'Please enter points';
+                final parsed = int.tryParse(raw);
+                if (parsed == null) return 'Points must be a number';
+                if (parsed < 0 || parsed > 1000) {
+                  return 'Points must be between 0 and 1000';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (formKey.currentState?.validate() ?? false) {
+                  Navigator.of(ctx).pop(true);
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != true) return;
+
+    final raw = controller.text.trim();
+    final parsed = int.tryParse(raw) ?? customer.points;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('customers')
+          .doc(customer.id)
+          .update({'points': parsed});
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update points: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

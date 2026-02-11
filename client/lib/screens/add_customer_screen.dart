@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
@@ -11,18 +13,37 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _pointsController = TextEditingController();
+  String _status = 'active';
+  bool _isSaving = false;
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _emailController.dispose();
+    _pointsController.dispose();
     super.dispose();
   }
 
-  void _saveCustomer() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _saveCustomer() async {
+    if (_isSaving) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final points = int.tryParse(_pointsController.text.trim()) ?? 0;
+
+    setState(() => _isSaving = true);
+    try {
+      await FirebaseFirestore.instance.collection('customers').add({
+        'name': name,
+        'phone': phone,
+        'points': points,
+        'status': _status,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Customer saved successfully!'),
@@ -30,6 +51,16 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         ),
       );
       Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save customer: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -110,9 +141,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                       TextFormField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ],
                         decoration: InputDecoration(
                           labelText: 'Phone Number',
-                          hintText: 'Enter phone number',
+                          hintText: 'Enter 10-digit phone number',
                           prefixIcon: const Icon(Icons.phone_outlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -121,25 +156,26 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           fillColor: const Color(0xFFF5F7FA),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
+                          final raw = (value ?? '').trim();
+                          if (raw.isEmpty) {
                             return 'Please enter phone number';
                           }
-                          if (value.length < 10) {
-                            return 'Phone number must be at least 10 digits';
+                          if (raw.length != 10) {
+                            return 'Phone number must be exactly 10 digits';
                           }
                           return null;
                         },
                       ),
                       SizedBox(height: isMobile ? 16 : 20),
 
-                      // Email (Optional)
+                      // Points (0 - 1000)
                       TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
+                        controller: _pointsController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                          labelText: 'Email (Optional)',
-                          hintText: 'Enter email address',
-                          prefixIcon: const Icon(Icons.email_outlined),
+                          labelText: 'Points',
+                          hintText: 'Enter starting points',
+                          prefixIcon: const Icon(Icons.stars_outlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -147,13 +183,34 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           fillColor: const Color(0xFFF5F7FA),
                         ),
                         validator: (value) {
-                          if (value != null &&
-                              value.isNotEmpty &&
-                              !value.contains('@')) {
-                            return 'Please enter a valid email';
-                          }
+                          final raw = (value ?? '').trim();
+                          if (raw.isEmpty) return 'Please enter points';
+                          final parsed = int.tryParse(raw);
+                          if (parsed == null) return 'Points must be a number';
+                          if (parsed < 0) return 'Points cannot be negative';
+                          if (parsed > 1000) return 'Points cannot be more than 1000';
                           return null;
                         },
+                      ),
+                      SizedBox(height: isMobile ? 16 : 20),
+
+                      // Status
+                      DropdownButtonFormField<String>(
+                        value: _status,
+                        decoration: InputDecoration(
+                          labelText: 'Status',
+                          prefixIcon: const Icon(Icons.verified_user_outlined),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF5F7FA),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'active', child: Text('active')),
+                          DropdownMenuItem(value: 'inactive', child: Text('inactive')),
+                        ],
+                        onChanged: (v) => setState(() => _status = v ?? 'active'),
                       ),
                       SizedBox(height: isMobile ? 24 : 32),
 
@@ -162,10 +219,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         width: double.infinity,
                         height: isSmall ? 48 : 54,
                         child: ElevatedButton.icon(
-                          onPressed: _saveCustomer,
-                          icon: const Icon(Icons.save),
+                          onPressed: _isSaving ? null : _saveCustomer,
+                          icon: _isSaving
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : const Icon(Icons.save),
                           label: Text(
-                            'Save Customer',
+                            _isSaving ? 'Saving...' : 'Save Customer',
                             style: TextStyle(
                               fontSize: isSmall ? 16 : 18,
                               fontWeight: FontWeight.bold,
