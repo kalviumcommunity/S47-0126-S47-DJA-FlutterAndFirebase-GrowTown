@@ -78,6 +78,15 @@ class DashboardScreen extends StatelessWidget {
                       Navigator.pushNamed(context, '/analytics');
                     },
                   ),
+                  _sideItem(
+                    context,
+                    Icons.notifications_active_outlined,
+                    "Alerts",
+                    false,
+                    onTap: () {
+                      Navigator.pushNamed(context, '/alerts');
+                    },
+                  ),
                   _sideItem(context, Icons.settings, "Settings", false),
 
                   const Spacer(),
@@ -220,6 +229,16 @@ class DashboardScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, '/analytics');
+                },
+              ),
+              _sideItem(
+                context,
+                Icons.notifications_active_outlined,
+                "Alerts",
+                false,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/alerts');
                 },
               ),
               _sideItem(context, Icons.settings, "Settings", false),
