@@ -348,6 +348,7 @@ class _CustomerListState extends State<CustomerList> {
           .collection('customers')
           .doc(customer.id)
           .update({'points': newValue});
+      await _maybeCreateMilestoneAlert(customer, newValue);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -417,11 +418,51 @@ class _CustomerListState extends State<CustomerList> {
           .collection('customers')
           .doc(customer.id)
           .update({'points': parsed});
+      await _maybeCreateMilestoneAlert(customer, parsed);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to update points: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _maybeCreateMilestoneAlert(
+      Customer customer, int newPoints) async {
+    if (customer.id.isEmpty) return;
+
+    // Milestones: 100, 200, ..., 1000
+    const milestones = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+    if (!milestones.contains(newPoints)) return;
+
+    try {
+      // Avoid duplicate unresolved alerts for same customer + milestone
+      final existing = await FirebaseFirestore.instance
+          .collection('alerts')
+          .where('customerId', isEqualTo: customer.id)
+          .where('milestone', isEqualTo: newPoints)
+          .where('resolved', isEqualTo: false)
+          .limit(1)
+          .get();
+
+      if (existing.docs.isNotEmpty) return;
+
+      await FirebaseFirestore.instance.collection('alerts').add({
+        'customerId': customer.id,
+        'customerName': customer.name,
+        'milestone': newPoints,
+        'pointsAtTime': newPoints,
+        'resolved': false,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to create alert: $e'),
           backgroundColor: Colors.red,
         ),
       );
