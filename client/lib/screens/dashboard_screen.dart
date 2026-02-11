@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:client/widgets/customer_list.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -50,9 +51,33 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
-                  _sideItem(context, Icons.dashboard, "Dashboard", true),
-                  _sideItem(context, Icons.people, "Customers", false),
-                  _sideItem(context, Icons.bar_chart, "Analytics", false),
+                  _sideItem(
+                    context,
+                    Icons.dashboard,
+                    "Dashboard",
+                    true,
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, '/dashboard');
+                    },
+                  ),
+                  _sideItem(
+                    context,
+                    Icons.people,
+                    "Customers",
+                    false,
+                    onTap: () {
+                      Navigator.pushNamed(context, '/customers');
+                    },
+                  ),
+                  _sideItem(
+                    context,
+                    Icons.bar_chart,
+                    "Analytics",
+                    false,
+                    onTap: () {
+                      Navigator.pushNamed(context, '/analytics');
+                    },
+                  ),
                   _sideItem(context, Icons.settings, "Settings", false),
 
                   const Spacer(),
@@ -114,17 +139,8 @@ class DashboardScreen extends StatelessWidget {
 
                     if (!isMobile) const SizedBox(height: 24),
 
-                    // ===== Dashboard Cards =====
-                    isMobile
-                        ? _buildMobileStatsGrid()
-                        : Row(
-                            children: [
-                              _statCard("Total Customers", "150", Colors.blue, isMobile),
-                              _statCard("Active", "98", Colors.green, isMobile),
-                              _statCard("Inactive", "52", Colors.orange, isMobile),
-                              _statCard("Top Points", "200", Colors.purple, isMobile),
-                            ],
-                          ),
+                    // ===== Dashboard Cards (live from Firestore) =====
+                    _buildStats(isMobile),
 
                     const SizedBox(height: 24),
 
@@ -177,9 +193,35 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 30),
 
-              _sideItem(context, Icons.dashboard, "Dashboard", true),
-              _sideItem(context, Icons.people, "Customers", false),
-              _sideItem(context, Icons.bar_chart, "Analytics", false),
+              _sideItem(
+                context,
+                Icons.dashboard,
+                "Dashboard",
+                true,
+                onTap: () {
+                  Navigator.pushReplacementNamed(context, '/dashboard');
+                },
+              ),
+              _sideItem(
+                context,
+                Icons.people,
+                "Customers",
+                false,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/customers');
+                },
+              ),
+              _sideItem(
+                context,
+                Icons.bar_chart,
+                "Analytics",
+                false,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/analytics');
+                },
+              ),
               _sideItem(context, Icons.settings, "Settings", false),
 
               const Spacer(),
@@ -203,23 +245,86 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // ================= Stats from Firestore =================
+  Widget _buildStats(bool isMobile) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance.collection('customers').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 80,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return const Text(
+            'Failed to load stats',
+            style: TextStyle(color: Colors.red),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+
+        int total = docs.length;
+        int active = 0;
+        int topPoints = 0;
+
+        for (final doc in docs) {
+          final data = doc.data();
+          final status = (data['status'] as String?) ?? 'inactive';
+          if (status == 'active') active++;
+
+          final points =
+              (data['points'] is num) ? (data['points'] as num).toInt() : 0;
+          if (points > topPoints) topPoints = points;
+        }
+
+        final inactive = total - active;
+
+        if (isMobile) {
+          return _buildMobileStatsGrid(
+            total: total,
+            active: active,
+            inactive: inactive,
+            topPoints: topPoints,
+          );
+        }
+
+        return Row(
+          children: [
+            _statCard("Total Customers", "$total", Colors.blue, isMobile),
+            _statCard("Active", "$active", Colors.green, isMobile),
+            _statCard("Inactive", "$inactive", Colors.orange, isMobile),
+            _statCard("Top Points", "$topPoints", Colors.purple, isMobile),
+          ],
+        );
+      },
+    );
+  }
+
   // ================= Mobile Stats Grid =================
-  Widget _buildMobileStatsGrid() {
+  Widget _buildMobileStatsGrid({
+    required int total,
+    required int active,
+    required int inactive,
+    required int topPoints,
+  }) {
     return Column(
       children: [
         Row(
           children: [
-            _statCard("Total Customers", "150", Colors.blue, true),
+            _statCard("Total Customers", "$total", Colors.blue, true),
             const SizedBox(width: 8),
-            _statCard("Active", "98", Colors.green, true),
+            _statCard("Active", "$active", Colors.green, true),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            _statCard("Inactive", "52", Colors.orange, true),
+            _statCard("Inactive", "$inactive", Colors.orange, true),
             const SizedBox(width: 8),
-            _statCard("Top Points", "200", Colors.purple, true),
+            _statCard("Top Points", "$topPoints", Colors.purple, true),
           ],
         ),
       ],
