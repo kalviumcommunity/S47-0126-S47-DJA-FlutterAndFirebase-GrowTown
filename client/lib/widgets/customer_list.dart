@@ -16,6 +16,8 @@ class _CustomerListState extends State<CustomerList> {
   String _searchQuery = '';
   String _filter = 'All';
   bool _isGrid = false;
+  final int _highValueThreshold = 500;
+  final int _highValueLimit = 10;
 
   List<Customer> _applyFilters(List<Customer> allCustomers) {
     final q = _searchQuery.toLowerCase();
@@ -47,8 +49,26 @@ class _CustomerListState extends State<CustomerList> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 600;
+    final bool isTablet = screenWidth >= 600 && screenWidth < 1100;
+    final int gridColumns = isMobile
+        ? 1
+        : (isTablet ? 2 : 3);
+
+    // Choose base Firestore query: either all customers or "high value"
+    Query<Map<String, dynamic>> baseQuery =
+        FirebaseFirestore.instance.collection('customers');
+
+    if (_filter == 'High value') {
+      baseQuery = baseQuery
+          .where('points', isGreaterThanOrEqualTo: _highValueThreshold)
+          .orderBy('points', descending: true)
+          .limit(_highValueLimit);
+    }
+
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('customers').snapshots(),
+      stream: baseQuery.snapshots(),
       builder: (context, snapshot) {
         // Loading state
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -110,6 +130,10 @@ class _CustomerListState extends State<CustomerList> {
                     DropdownMenuItem(value: 'Points > 100', child: Text('Points > 100')),
                     DropdownMenuItem(value: 'Active', child: Text('Active')),
                     DropdownMenuItem(value: 'Inactive', child: Text('Inactive')),
+                    DropdownMenuItem(
+                      value: 'High value',
+                      child: Text('High value (top)'),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _filter = v!),
                 ),
@@ -171,11 +195,11 @@ class _CustomerListState extends State<CustomerList> {
                   : _isGrid
                       ? GridView.builder(
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 1.3,
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: gridColumns,
+                            crossAxisSpacing: isMobile ? 12 : 16,
+                            mainAxisSpacing: isMobile ? 12 : 16,
+                            childAspectRatio: isMobile ? 1.1 : 1.3,
                           ),
                           itemCount: filtered.length,
                           itemBuilder: (context, index) {
