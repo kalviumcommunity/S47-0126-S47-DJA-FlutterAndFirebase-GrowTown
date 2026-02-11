@@ -67,6 +67,33 @@ See [PERSISTENT_SESSIONS.md](docs/PERSISTENT_SESSIONS.md) for detailed implement
 
 ## 🎯 Getting Started
 
+## 🗄️ Firestore Data Requirements
+
+This section lists the entities the app stores in Cloud Firestore and their primary purposes. These requirements guide the database schema design and are written to minimize reads/writes and to scale to many users.
+
+Data requirements:
+
+- **Users**: Authenticated app users and public profile info (displayName, email, photoURL, role). Used for authentication, authorization, and user-specific data.
+- **Profiles**: Extended user metadata (preferences, bio, settings) stored either in a `profiles` collection or as fields on `users/{uid}` depending on read patterns.
+- **Customers**: Business customers managed by the app (name, contact, address, tags, createdBy). Core entity shown in `Dashboard` and `Add Customer` screens.
+- **Products**: Catalog of products/services (`title`, `price`, `sku`, `stock`, `images`) referenced from interactions or orders.
+- **Interactions / Orders**: Records of interactions, sales, or orders related to a customer. Can be a subcollection `customers/{customerId}/interactions` for independent growth and efficient querying.
+- **Notifications**: Per-user notifications stored under `users/{uid}/notifications` to allow efficient reads and deletes per user.
+- **AppConfig**: Global configuration (feature flags, pricing tiers) stored in a small `config` collection or single doc for live updates.
+- **AuditLogs**: Append-only `logs` collection for admin auditing and background job outputs.
+
+Field and behavior expectations:
+
+- Use `createdAt` and `updatedAt` timestamps on major documents.
+- Use lowerCamelCase for field names.
+- Prefer subcollections for large, growing datasets (e.g., `interactions`, `notifications`).
+- Reference related documents with `DocumentReference` where needed (`userRef`, `customerRef`, `productRef`) to avoid duplication.
+- Index frequently queried fields (e.g., `createdBy`, `status`, `customerId`) via Firestore composite indexes when queries require it.
+
+These requirements will be translated into a full Firestore schema in the next step.
+
+See the full schema and visual diagram in [docs/FIRESTORE_SCHEMA.md](docs/FIRESTORE_SCHEMA.md).
+
 ### Prerequisites
 - Flutter SDK (3.0 or higher)
 - Firebase account with project setup
