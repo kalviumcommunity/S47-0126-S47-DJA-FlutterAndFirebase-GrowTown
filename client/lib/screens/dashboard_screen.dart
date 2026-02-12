@@ -23,6 +23,7 @@ class DashboardScreen extends StatelessWidget {
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: FirebaseFirestore.instance
                       .collection('alerts')
+                      .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                       .where('resolved', isEqualTo: false)
                       .snapshots(),
                   builder: (context, snapshot) {
@@ -117,6 +118,7 @@ class DashboardScreen extends StatelessWidget {
                   StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
                         .collection('alerts')
+                        .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                         .where('resolved', isEqualTo: false)
                         .snapshots(),
                     builder: (context, snapshot) {
@@ -313,6 +315,7 @@ class DashboardScreen extends StatelessWidget {
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance
                     .collection('alerts')
+                    .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                     .where('resolved', isEqualTo: false)
                     .snapshots(),
                 builder: (context, snapshot) {
@@ -388,8 +391,13 @@ class DashboardScreen extends StatelessWidget {
 
   // ================= Stats from Firestore =================
   Widget _buildStats(bool isMobile) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    Query<Map<String, dynamic>> q = FirebaseFirestore.instance.collection('customers');
+    if (uid != null && uid.isNotEmpty) {
+      q = q.where('createdBy', isEqualTo: uid);
+    }
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('customers').snapshots(),
+      stream: q.snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SizedBox(
