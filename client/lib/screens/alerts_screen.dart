@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AlertsScreen extends StatelessWidget {
@@ -28,6 +29,7 @@ class AlertsScreen extends StatelessWidget {
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance
                     .collection('alerts')
+                    .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                     .where('resolved', isEqualTo: false)
                     .orderBy('createdAt', descending: true)
                     .snapshots(),

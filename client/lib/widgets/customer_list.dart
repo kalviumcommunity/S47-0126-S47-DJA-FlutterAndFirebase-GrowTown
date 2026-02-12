@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:client/models/customer.dart';
 
@@ -22,7 +23,8 @@ class _CustomerListState extends State<CustomerList> {
   List<Customer> _applyFilters(List<Customer> allCustomers) {
     final q = _searchQuery.toLowerCase();
     return allCustomers.where((c) {
-      final matchesQuery = c.name.toLowerCase().contains(q) || c.phone.contains(q);
+      final matchesQuery =
+          c.name.toLowerCase().contains(q) || c.phone.contains(q);
       if (!matchesQuery) return false;
       if (_filter == 'All') return true;
       if (_filter == 'Points > 50') return c.points > 50;
@@ -37,13 +39,15 @@ class _CustomerListState extends State<CustomerList> {
 
   double _averagePoints(List<Customer> allCustomers) {
     if (allCustomers.isEmpty) return 0;
-    final total = allCustomers.map((c) => c.points).fold<int>(0, (a, b) => a + b);
+    final total =
+        allCustomers.map((c) => c.points).fold<int>(0, (a, b) => a + b);
     return total / allCustomers.length;
   }
 
   Customer? _topCustomer(List<Customer> allCustomers) {
     if (allCustomers.isEmpty) return null;
-    final sorted = [...allCustomers]..sort((a, b) => b.points.compareTo(a.points));
+    final sorted = [...allCustomers]
+      ..sort((a, b) => b.points.compareTo(a.points));
     return sorted.first;
   }
 
@@ -52,13 +56,15 @@ class _CustomerListState extends State<CustomerList> {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 600;
     final bool isTablet = screenWidth >= 600 && screenWidth < 1100;
-    final int gridColumns = isMobile
-        ? 1
-        : (isTablet ? 2 : 3);
+    final int gridColumns = isMobile ? 1 : (isTablet ? 2 : 3);
 
     // Choose base Firestore query: either all customers or "high value"
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     Query<Map<String, dynamic>> baseQuery =
         FirebaseFirestore.instance.collection('customers');
+    if (uid != null && uid.isNotEmpty) {
+      baseQuery = baseQuery.where('createdBy', isEqualTo: uid);
+    }
 
     if (_filter == 'High value') {
       baseQuery = baseQuery
@@ -126,10 +132,13 @@ class _CustomerListState extends State<CustomerList> {
                   value: _filter,
                   items: const [
                     DropdownMenuItem(value: 'All', child: Text('All')),
-                    DropdownMenuItem(value: 'Points > 50', child: Text('Points > 50')),
-                    DropdownMenuItem(value: 'Points > 100', child: Text('Points > 100')),
+                    DropdownMenuItem(
+                        value: 'Points > 50', child: Text('Points > 50')),
+                    DropdownMenuItem(
+                        value: 'Points > 100', child: Text('Points > 100')),
                     DropdownMenuItem(value: 'Active', child: Text('Active')),
-                    DropdownMenuItem(value: 'Inactive', child: Text('Inactive')),
+                    DropdownMenuItem(
+                        value: 'Inactive', child: Text('Inactive')),
                     DropdownMenuItem(
                       value: 'High value',
                       child: Text('High value (top)'),
@@ -139,11 +148,13 @@ class _CustomerListState extends State<CustomerList> {
                 ),
                 const SizedBox(width: 12),
                 IconButton(
-                  icon: Icon(Icons.view_list, color: !_isGrid ? Colors.blue : Colors.grey),
+                  icon: Icon(Icons.view_list,
+                      color: !_isGrid ? Colors.blue : Colors.grey),
                   onPressed: () => setState(() => _isGrid = false),
                 ),
                 IconButton(
-                  icon: Icon(Icons.grid_view, color: _isGrid ? Colors.blue : Colors.grey),
+                  icon: Icon(Icons.grid_view,
+                      color: _isGrid ? Colors.blue : Colors.grey),
                   onPressed: () => setState(() => _isGrid = true),
                 ),
               ],
@@ -222,7 +233,8 @@ class _CustomerListState extends State<CustomerList> {
                                     child: Row(
                                       children: [
                                         IconButton(
-                                          icon: const Icon(Icons.remove, size: 18),
+                                          icon: const Icon(Icons.remove,
+                                              size: 18),
                                           tooltip: 'Decrease points',
                                           onPressed: canEdit && c.points > 0
                                               ? () => _updatePoints(c, -1)
@@ -241,7 +253,8 @@ class _CustomerListState extends State<CustomerList> {
                                   ),
                                   Expanded(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Chip(
                                           label: Text(c.status),
@@ -250,7 +263,8 @@ class _CustomerListState extends State<CustomerList> {
                                               : Colors.grey[300],
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.edit, size: 18),
+                                          icon:
+                                              const Icon(Icons.edit, size: 18),
                                           tooltip: 'Edit points',
                                           onPressed: canEdit
                                               ? () => _editPoints(context, c)
@@ -318,9 +332,8 @@ class _CustomerListState extends State<CustomerList> {
               ),
               Chip(
                 label: Text(c.status),
-                backgroundColor: c.status == 'active'
-                    ? Colors.green[100]
-                    : Colors.grey[300],
+                backgroundColor:
+                    c.status == 'active' ? Colors.green[100] : Colors.grey[300],
               ),
             ],
           ),
@@ -433,6 +446,8 @@ class _CustomerListState extends State<CustomerList> {
   Future<void> _maybeCreateMilestoneAlert(
       Customer customer, int newPoints) async {
     if (customer.id.isEmpty) return;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || uid.isEmpty) return;
 
     // Milestones: 100, 200, ..., 1000
     const milestones = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
@@ -443,6 +458,7 @@ class _CustomerListState extends State<CustomerList> {
       final existing = await FirebaseFirestore.instance
           .collection('alerts')
           .where('customerId', isEqualTo: customer.id)
+          .where('shopkeeperId', isEqualTo: uid)
           .where('milestone', isEqualTo: newPoints)
           .where('resolved', isEqualTo: false)
           .limit(1)
@@ -451,6 +467,7 @@ class _CustomerListState extends State<CustomerList> {
       if (existing.docs.isNotEmpty) return;
 
       await FirebaseFirestore.instance.collection('alerts').add({
+        'shopkeeperId': uid,
         'customerId': customer.id,
         'customerName': customer.name,
         'milestone': newPoints,
