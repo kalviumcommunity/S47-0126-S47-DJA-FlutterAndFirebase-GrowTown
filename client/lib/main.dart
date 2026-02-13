@@ -12,7 +12,11 @@ import 'screens/create_account_screen.dart';
 import 'screens/auth_wrapper.dart';
 import 'screens/customers_screen.dart';
 import 'screens/analytics_screen.dart';
+<<<<<<< HEAD
+import 'screens/cloud_functions_screen.dart';
+=======
 import 'screens/alerts_screen.dart';
+>>>>>>> main
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,7 +112,11 @@ class MyApp extends StatelessWidget {
         '/createAccount': (context) => const CreateAccountScreen(),
         '/customers': (context) => const CustomersScreen(),
         '/analytics': (context) => const AnalyticsScreen(),
+<<<<<<< HEAD
+        '/cloudFunctions': (context) => const CloudFunctionsScreen(),
+=======
         '/alerts': (context) => const AlertsScreen(),
+>>>>>>> main
       },
     );
   }
