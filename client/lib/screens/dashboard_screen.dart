@@ -20,6 +20,43 @@ class DashboardScreen extends StatelessWidget {
               backgroundColor: const Color(0xFF2F3A8F),
               foregroundColor: Colors.white,
               actions: [
+                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: FirebaseFirestore.instance
+                      .collection('alerts')
+                      .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                      .where('resolved', isEqualTo: false)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data?.size ?? 0;
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.notifications_none),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/alerts');
+                          },
+                        ),
+                        if (count > 0)
+                          Positioned(
+                            right: 10,
+                            top: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                count > 99 ? '99+' : '$count',
+                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
                 IconButton(
                   icon: const Icon(Icons.person),
                   onPressed: () {
@@ -76,6 +113,59 @@ class DashboardScreen extends StatelessWidget {
                     false,
                     onTap: () {
                       Navigator.pushNamed(context, '/analytics');
+                    },
+                  ),
+                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: FirebaseFirestore.instance
+                        .collection('alerts')
+                        .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                        .where('resolved', isEqualTo: false)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      final count = snapshot.data?.size ?? 0;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/alerts');
+                          },
+                          child: Row(
+                            children: [
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  const Icon(Icons.notifications_active_outlined, color: Colors.white),
+                                  if (count > 0)
+                                    Positioned(
+                                      right: -6,
+                                      top: -6,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Text(
+                                          count > 99 ? '99+' : '$count',
+                                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(width: 12),
+                              const Text("Alerts", style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                      );
                     },
                   ),
                   _sideItem(context, Icons.settings, "Settings", false),
@@ -222,6 +312,60 @@ class DashboardScreen extends StatelessWidget {
                   Navigator.pushNamed(context, '/analytics');
                 },
               ),
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('alerts')
+                    .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                    .where('resolved', isEqualTo: false)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  final count = snapshot.data?.size ?? 0;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/alerts');
+                      },
+                      child: Row(
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              const Icon(Icons.notifications_active_outlined, color: Colors.white),
+                              if (count > 0)
+                                Positioned(
+                                  right: -6,
+                                  top: -6,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      count > 99 ? '99+' : '$count',
+                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(width: 12),
+                          const Text("Alerts", style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
               _sideItem(context, Icons.settings, "Settings", false),
 
               const Spacer(),
@@ -247,8 +391,13 @@ class DashboardScreen extends StatelessWidget {
 
   // ================= Stats from Firestore =================
   Widget _buildStats(bool isMobile) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    Query<Map<String, dynamic>> q = FirebaseFirestore.instance.collection('customers');
+    if (uid != null && uid.isNotEmpty) {
+      q = q.where('createdBy', isEqualTo: uid);
+    }
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('customers').snapshots(),
+      stream: q.snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SizedBox(

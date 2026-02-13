@@ -6,7 +6,9 @@ class CustomersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 800;
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 800;
+    final isTablet = size.width >= 800 && size.width < 1200;
 
     return Scaffold(
       appBar: AppBar(
@@ -18,7 +20,14 @@ class CustomersScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(isMobile ? 16 : 24),
-          child: const CustomerList(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isTablet ? 900 : 1200,
+              ),
+              child: const CustomerList(),
+            ),
+          ),
         ),
       ),
     );

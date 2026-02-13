@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -32,6 +33,16 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final points = int.tryParse(_pointsController.text.trim()) ?? 0;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || uid.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please sign in to save customer'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isSaving = true);
     try {
@@ -41,6 +52,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         'points': points,
         'status': _status,
         'createdAt': FieldValue.serverTimestamp(),
+        'createdBy': uid,
       });
 
       if (!mounted) return;
@@ -188,7 +200,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           final parsed = int.tryParse(raw);
                           if (parsed == null) return 'Points must be a number';
                           if (parsed < 0) return 'Points cannot be negative';
-                          if (parsed > 1000) return 'Points cannot be more than 1000';
+                          if (parsed > 1000)
+                            return 'Points cannot be more than 1000';
                           return null;
                         },
                       ),
@@ -207,10 +220,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           fillColor: const Color(0xFFF5F7FA),
                         ),
                         items: const [
-                          DropdownMenuItem(value: 'active', child: Text('active')),
-                          DropdownMenuItem(value: 'inactive', child: Text('inactive')),
+                          DropdownMenuItem(
+                              value: 'active', child: Text('active')),
+                          DropdownMenuItem(
+                              value: 'inactive', child: Text('inactive')),
                         ],
-                        onChanged: (v) => setState(() => _status = v ?? 'active'),
+                        onChanged: (v) =>
+                            setState(() => _status = v ?? 'active'),
                       ),
                       SizedBox(height: isMobile ? 24 : 32),
 
@@ -226,7 +242,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                                   height: 18,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
                                   ),
                                 )
                               : const Icon(Icons.save),
