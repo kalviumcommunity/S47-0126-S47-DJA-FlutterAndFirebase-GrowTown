@@ -12,11 +12,9 @@ import 'screens/create_account_screen.dart';
 import 'screens/auth_wrapper.dart';
 import 'screens/customers_screen.dart';
 import 'screens/analytics_screen.dart';
-<<<<<<< HEAD
 import 'screens/cloud_functions_screen.dart';
-=======
 import 'screens/alerts_screen.dart';
->>>>>>> main
+import 'screens/shops_map_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,8 +23,6 @@ void main() async {
   );
   runApp(const MyApp());
 }
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -85,17 +81,17 @@ class MyApp extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            minimumSize: Size(double.infinity, 48),
+            minimumSize: const Size(double.infinity, 48),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: Colors.black),
+            side: const BorderSide(color: Colors.black),
             foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            minimumSize: Size(double.infinity, 48),
+            minimumSize: const Size(double.infinity, 48),
           ),
         ),
       ),
@@ -107,16 +103,14 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardScreen(),
         '/addCustomer': (context) => const AddCustomerScreen(),
         '/profile': (context) => const ProfileScreen(),
-        '/scrollable': (context) => const ScrollableViews(), // ✅ NEW ROUTE
+        '/scrollable': (context) => const ScrollableViews(),
         '/userForm': (context) => const UserInputForm(),
         '/createAccount': (context) => const CreateAccountScreen(),
         '/customers': (context) => const CustomersScreen(),
         '/analytics': (context) => const AnalyticsScreen(),
-<<<<<<< HEAD
         '/cloudFunctions': (context) => const CloudFunctionsScreen(),
-=======
         '/alerts': (context) => const AlertsScreen(),
->>>>>>> main
+        '/shopsMap': (context) => const ShopsMapScreen(),
       },
     );
   }
