@@ -13,6 +13,7 @@ import 'screens/auth_wrapper.dart';
 import 'screens/customers_screen.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/alerts_screen.dart';
+import 'screens/shops_map_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +22,6 @@ void main() async {
   );
   runApp(const MyApp());
 }
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -109,6 +108,7 @@ class MyApp extends StatelessWidget {
         '/customers': (context) => const CustomersScreen(),
         '/analytics': (context) => const AnalyticsScreen(),
         '/alerts': (context) => const AlertsScreen(),
+        '/shopsMap': (context) => const ShopsMapScreen(),
       },
     );
   }
