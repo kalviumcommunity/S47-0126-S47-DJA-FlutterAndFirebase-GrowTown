@@ -124,6 +124,15 @@ class DashboardScreen extends StatelessWidget {
                       Navigator.pushNamed(context, '/shopsMap');
                     },
                   ),
+                  _sideItem(
+                    context,
+                    Icons.note_alt_outlined,
+                    "My Notes",
+                    false,
+                    onTap: () {
+                      Navigator.pushNamed(context, '/myNotes');
+                    },
+                  ),
                   StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
                         .collection('alerts')
@@ -329,6 +338,16 @@ class DashboardScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, '/shopsMap');
+                },
+              ),
+              _sideItem(
+                context,
+                Icons.note_alt_outlined,
+                "My Notes",
+                false,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/myNotes');
                 },
               ),
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
