@@ -23,7 +23,8 @@ class DashboardScreen extends StatelessWidget {
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: FirebaseFirestore.instance
                       .collection('alerts')
-                      .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                      .where('shopkeeperId',
+                          isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                       .where('resolved', isEqualTo: false)
                       .snapshots(),
                   builder: (context, snapshot) {
@@ -42,14 +43,18 @@ class DashboardScreen extends StatelessWidget {
                             right: 10,
                             top: 12,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: Colors.red,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
                                 count > 99 ? '99+' : '$count',
-                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -69,7 +74,6 @@ class DashboardScreen extends StatelessWidget {
       drawer: isMobile ? _buildDrawer(context) : null,
       body: Row(
         children: [
-          // ================= Sidebar (Desktop only) =================
           if (!isMobile)
             Container(
               width: isTablet ? 200 : 240,
@@ -88,140 +92,64 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
-                  _sideItem(
-                    context,
-                    Icons.dashboard,
-                    "Dashboard",
-                    true,
-                    onTap: () {
-                      Navigator.pushReplacementNamed(context, '/dashboard');
-                    },
-                  ),
-                  _sideItem(
-                    context,
-                    Icons.people,
-                    "Customers",
-                    false,
-                    onTap: () {
-                      Navigator.pushNamed(context, '/customers');
-                    },
-                  ),
-                  _sideItem(
-                    context,
-                    Icons.bar_chart,
-                    "Analytics",
-                    false,
-                    onTap: () {
-                      Navigator.pushNamed(context, '/analytics');
-                    },
-                  ),
-                  _sideItem(
-                    context,
-                    Icons.location_on,
-                    "Shops Map",
-                    false,
-                    onTap: () {
-                      Navigator.pushNamed(context, '/shopsMap');
-                    },
-                  ),
-                  _sideItem(
-                    context,
-                    Icons.note_alt_outlined,
-                    "My Notes",
-                    false,
-                    onTap: () {
-                      Navigator.pushNamed(context, '/myNotes');
-                    },
-                  ),
-                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection('alerts')
-                        .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-                        .where('resolved', isEqualTo: false)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      final count = snapshot.data?.size ?? 0;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/alerts');
-                          },
-                          child: Row(
-                            children: [
-                              Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  const Icon(Icons.notifications_active_outlined, color: Colors.white),
-                                  if (count > 0)
-                                    Positioned(
-                                      right: -6,
-                                      top: -6,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          count > 99 ? '99+' : '$count',
-                                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(width: 12),
-                              const Text("Alerts", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  _sideItem(context, Icons.settings, "Settings", false),
+                  _sideItem(context, Icons.dashboard, "Dashboard", true,
+                      onTap: () {
+                    Navigator.pushReplacementNamed(context, '/dashboard');
+                  }),
+                  _sideItem(context, Icons.people, "Customers", false,
+                      onTap: () {
+                    Navigator.pushNamed(context, '/customers');
+                  }),
+                  _sideItem(context, Icons.bar_chart, "Analytics", false,
+                      onTap: () {
+                    Navigator.pushNamed(context, '/analytics');
+                  }),
+                  _sideItem(context, Icons.location_on, "Shops Map", false,
+                      onTap: () {
+                    Navigator.pushNamed(context, '/shopsMap');
+                  }),
+
+                  // ✅ Profile Form
+                  _sideItem(context, Icons.assignment, "Profile Form", false,
+                      onTap: () {
+                    Navigator.pushNamed(context, '/profileDetailsForm');
+                  }),
+
+                  // ✅ My Notes
+                  _sideItem(context, Icons.note_alt_outlined, "My Notes", false,
+                      onTap: () {
+                    Navigator.pushNamed(context, '/myNotes');
+                  }),
 
                   const Spacer(),
 
-                  _sideItem(
-                    context,
-                    Icons.logout,
-                    "Logout",
-                    false,
-                    onTap: () async {
-                      await FirebaseAuth.instance.signOut();
-                      if (context.mounted) {
-                        Navigator.pushReplacementNamed(context, '/auth');
-                      }
-                    },
-                  ),
+                  _sideItem(context, Icons.logout, "Logout", false,
+                      onTap: () async {
+                    await FirebaseAuth.instance.signOut();
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, '/auth');
+                    }
+                  }),
                 ],
               ),
             ),
 
-          // ================= Main Content =================
           Expanded(
             child: SafeArea(
               child: SingleChildScrollView(
-                padding: EdgeInsets.all(isMobile ? 16 : (isTablet ? 20 : 24)),
+                padding:
+                    EdgeInsets.all(isMobile ? 16 : (isTablet ? 20 : 24)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ===== Top Bar (Desktop only) =====
                     if (!isMobile)
                       Row(
                         children: [
                           Expanded(
                             child: Container(
                               height: 44,
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(30),
@@ -247,12 +175,10 @@ class DashboardScreen extends StatelessWidget {
 
                     if (!isMobile) const SizedBox(height: 24),
 
-                    // ===== Dashboard Cards (live from Firestore) =====
                     _buildStats(isMobile),
 
                     const SizedBox(height: 24),
 
-                    // ===== Customers Section =====
                     Container(
                       height: isMobile ? 400 : (isTablet ? 450 : 500),
                       padding: EdgeInsets.all(isMobile ? 12 : 16),
@@ -270,7 +196,6 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
 
-      // ================= FAB =================
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF2F3A8F),
         onPressed: () {
@@ -281,7 +206,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // ================= Mobile Drawer =================
+  // Drawer updated the same way (both items included)
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
       backgroundColor: const Color(0xFF2F3A8F),
@@ -291,292 +216,58 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "ClientDash",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              const Text("ClientDash",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 30),
 
-              _sideItem(
-                context,
-                Icons.dashboard,
-                "Dashboard",
-                true,
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, '/dashboard');
-                },
-              ),
-              _sideItem(
-                context,
-                Icons.people,
-                "Customers",
-                false,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/customers');
-                },
-              ),
-              _sideItem(
-                context,
-                Icons.bar_chart,
-                "Analytics",
-                false,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/analytics');
-                },
-              ),
-              _sideItem(
-                context,
-                Icons.location_on,
-                "Shops Map",
-                false,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/shopsMap');
-                },
-              ),
-              _sideItem(
-                context,
-                Icons.note_alt_outlined,
-                "My Notes",
-                false,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/myNotes');
-                },
-              ),
-              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: FirebaseFirestore.instance
-                    .collection('alerts')
-                    .where('shopkeeperId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-                    .where('resolved', isEqualTo: false)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  final count = snapshot.data?.size ?? 0;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, '/alerts');
-                      },
-                      child: Row(
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              const Icon(Icons.notifications_active_outlined, color: Colors.white),
-                              if (count > 0)
-                                Positioned(
-                                  right: -6,
-                                  top: -6,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Text(
-                                      count > 99 ? '99+' : '$count',
-                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(width: 12),
-                          const Text("Alerts", style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-              _sideItem(context, Icons.settings, "Settings", false),
+              _sideItem(context, Icons.dashboard, "Dashboard", true,
+                  onTap: () {
+                Navigator.pushReplacementNamed(context, '/dashboard');
+              }),
+              _sideItem(context, Icons.people, "Customers", false,
+                  onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/customers');
+              }),
+              _sideItem(context, Icons.bar_chart, "Analytics", false,
+                  onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/analytics');
+              }),
+              _sideItem(context, Icons.location_on, "Shops Map", false,
+                  onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/shopsMap');
+              }),
+
+              // ✅ Profile Form
+              _sideItem(context, Icons.assignment, "Profile Form", false,
+                  onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/profileDetailsForm');
+              }),
+
+              // ✅ My Notes
+              _sideItem(context, Icons.note_alt_outlined, "My Notes", false,
+                  onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/myNotes');
+              }),
 
               const Spacer(),
 
-              _sideItem(
-                context,
-                Icons.logout,
-                "Logout",
-                false,
-                onTap: () async {
-                  await FirebaseAuth.instance.signOut();
-                  if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, '/auth');
-                  }
-                },
-              ),
+              _sideItem(context, Icons.logout, "Logout", false,
+                  onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, '/auth');
+                }
+              }),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  // ================= Stats from Firestore =================
-  Widget _buildStats(bool isMobile) {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    Query<Map<String, dynamic>> q = FirebaseFirestore.instance.collection('customers');
-    if (uid != null && uid.isNotEmpty) {
-      q = q.where('createdBy', isEqualTo: uid);
-    }
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: q.snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            height: 80,
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return const Text(
-            'Failed to load stats',
-            style: TextStyle(color: Colors.red),
-          );
-        }
-
-        final docs = snapshot.data?.docs ?? [];
-
-        int total = docs.length;
-        int active = 0;
-        int topPoints = 0;
-
-        for (final doc in docs) {
-          final data = doc.data();
-          final status = (data['status'] as String?) ?? 'inactive';
-          if (status == 'active') active++;
-
-          final points =
-              (data['points'] is num) ? (data['points'] as num).toInt() : 0;
-          if (points > topPoints) topPoints = points;
-        }
-
-        final inactive = total - active;
-
-        if (isMobile) {
-          return _buildMobileStatsGrid(
-            total: total,
-            active: active,
-            inactive: inactive,
-            topPoints: topPoints,
-          );
-        }
-
-        return Row(
-          children: [
-            _statCard("Total Customers", "$total", Colors.blue, isMobile),
-            _statCard("Active", "$active", Colors.green, isMobile),
-            _statCard("Inactive", "$inactive", Colors.orange, isMobile),
-            _statCard("Top Points", "$topPoints", Colors.purple, isMobile),
-          ],
-        );
-      },
-    );
-  }
-
-  // ================= Mobile Stats Grid =================
-  Widget _buildMobileStatsGrid({
-    required int total,
-    required int active,
-    required int inactive,
-    required int topPoints,
-  }) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            _statCard("Total Customers", "$total", Colors.blue, true),
-            const SizedBox(width: 8),
-            _statCard("Active", "$active", Colors.green, true),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            _statCard("Inactive", "$inactive", Colors.orange, true),
-            const SizedBox(width: 8),
-            _statCard("Top Points", "$topPoints", Colors.purple, true),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // ================= Animated Sidebar Item =================
-  Widget _sideItem(
-    BuildContext context,
-    IconData icon,
-    String title,
-    bool active, {
-    VoidCallback? onTap,
-  }) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: active ? Colors.white24 : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: InkWell(
-        onTap: onTap ?? () {},
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(width: 12),
-            Text(title, style: const TextStyle(color: Colors.white)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ================= Animated Stat Card =================
-  Widget _statCard(String title, String value, Color color, bool isMobile) {
-    return Expanded(
-      child: Container(
-        margin: EdgeInsets.only(right: isMobile ? 0 : 16),
-        padding: EdgeInsets.all(isMobile ? 12 : 16),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: color,
-                fontSize: isMobile ? 12 : 14,
-              ),
-            ),
-            SizedBox(height: isMobile ? 6 : 10),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: isMobile ? 20 : 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
         ),
       ),
     );

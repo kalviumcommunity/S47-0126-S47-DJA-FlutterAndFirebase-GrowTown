@@ -15,6 +15,7 @@ import 'screens/analytics_screen.dart';
 import 'screens/cloud_functions_screen.dart';
 import 'screens/alerts_screen.dart';
 import 'screens/shops_map_screen.dart';
+import 'screens/profile_details_form.dart';
 import 'screens/my_notes_screen.dart';
 
 void main() async {
@@ -112,6 +113,7 @@ class MyApp extends StatelessWidget {
         '/cloudFunctions': (context) => const CloudFunctionsScreen(),
         '/alerts': (context) => const AlertsScreen(),
         '/shopsMap': (context) => const ShopsMapScreen(),
+        '/profileDetailsForm': (context) => const ProfileDetailsForm(),
         '/myNotes': (context) => const MyNotesScreen(),
       },
     );
