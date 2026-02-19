@@ -79,197 +79,233 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isSmall = size.width < 360;
-    final isTablet = size.width > 600;
     final isMobile = size.width < 800;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
-        title: const Text('Add Customer'),
-        backgroundColor: const Color(0xFF2F3A8F),
-        foregroundColor: Colors.white,
+        title: const Text(
+          'Add Customer',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+        ),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          padding: EdgeInsets.all(isMobile ? 20 : 32),
           child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: isTablet ? 600 : double.infinity,
-              ),
-              child: Container(
-                padding: EdgeInsets.all(isMobile ? 20 : 32),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Customer Information',
-                        style: TextStyle(
-                          fontSize: isSmall ? 20 : 24,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2F3A8F),
-                        ),
-                      ),
-                      SizedBox(height: isMobile ? 20 : 24),
-
-                      // Customer Name
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: 'Customer Name',
-                          hintText: 'Enter customer name',
-                          prefixIcon: const Icon(Icons.person_outline),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: const Color(0xFFF5F7FA),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter customer name';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: isMobile ? 16 : 20),
-
-                      // Phone Number
-                      TextFormField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
-                        ],
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          hintText: 'Enter 10-digit phone number',
-                          prefixIcon: const Icon(Icons.phone_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: const Color(0xFFF5F7FA),
-                        ),
-                        validator: (value) {
-                          final raw = (value ?? '').trim();
-                          if (raw.isEmpty) {
-                            return 'Please enter phone number';
-                          }
-                          if (raw.length != 10) {
-                            return 'Phone number must be exactly 10 digits';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: isMobile ? 16 : 20),
-
-                      // Points (0 - 1000)
-                      TextFormField(
-                        controller: _pointsController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Points',
-                          hintText: 'Enter starting points',
-                          prefixIcon: const Icon(Icons.stars_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: const Color(0xFFF5F7FA),
-                        ),
-                        validator: (value) {
-                          final raw = (value ?? '').trim();
-                          if (raw.isEmpty) return 'Please enter points';
-                          final parsed = int.tryParse(raw);
-                          if (parsed == null) return 'Points must be a number';
-                          if (parsed < 0) return 'Points cannot be negative';
-                          if (parsed > 1000)
-                            return 'Points cannot be more than 1000';
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: isMobile ? 16 : 20),
-
-                      // Status
-                      DropdownButtonFormField<String>(
-                        value: _status,
-                        decoration: InputDecoration(
-                          labelText: 'Status',
-                          prefixIcon: const Icon(Icons.verified_user_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: const Color(0xFFF5F7FA),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                              value: 'active', child: Text('active')),
-                          DropdownMenuItem(
-                              value: 'inactive', child: Text('inactive')),
-                        ],
-                        onChanged: (v) =>
-                            setState(() => _status = v ?? 'active'),
-                      ),
-                      SizedBox(height: isMobile ? 24 : 32),
-
-                      // Save Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: isSmall ? 48 : 54,
-                        child: ElevatedButton.icon(
-                          onPressed: _isSaving ? null : _saveCustomer,
-                          icon: _isSaving
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  ),
-                                )
-                              : const Icon(Icons.save),
-                          label: Text(
-                            _isSaving ? 'Saving...' : 'Save Customer',
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'New Customer Details',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: isSmall ? 16 : 18,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade800,
                             ),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2F3A8F),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          const SizedBox(height: 32),
+
+                          // Name Input
+                          _buildLabel("Full Name"),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: _inputDecoration(
+                                "Enter full name", Icons.person_outline_rounded),
+                            validator: (val) => val == null || val.isEmpty
+                                ? 'Name is required'
+                                : null,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Phone Input
+                          _buildLabel("Phone Number"),
+                          TextFormField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: _inputDecoration(
+                                "Enter phone number", Icons.phone_outlined),
+                            validator: (val) => val == null || val.isEmpty
+                                ? 'Phone is required'
+                                : null,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Points Input
+                          _buildLabel("Initial Points"),
+                          TextFormField(
+                            controller: _pointsController,
+                            keyboardType: TextInputType.number,
+                            decoration: _inputDecoration(
+                                "0", Icons.star_outline_rounded),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Status Dropdown
+                          _buildLabel("Status"),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _status,
+                                isExpanded: true,
+                                icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                items: const [
+                                  DropdownMenuItem(
+                                      value: 'active', child: Text('Active')),
+                                  DropdownMenuItem(
+                                      value: 'inactive',
+                                      child: Text('Inactive')),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) setState(() => _status = val);
+                                },
+                              ),
                             ),
                           ),
-                        ),
+
+                          const SizedBox(height: 40),
+
+                          // Save Button
+                          SizedBox(
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: _isSaving ? null : _saveCustomer,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF2F3A8F),
+                                      Color(0xFF5C6BC0)
+                                    ],
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF2F3A8F)
+                                          .withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child: _isSaving
+                                      ? const SizedBox(
+                                          height: 24,
+                                          width: 24,
+                                          child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2),
+                                        )
+                                      : const Text(
+                                          'Save Customer',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.black54,
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, color: Colors.grey.shade400, size: 22),
+      filled: true,
+      fillColor: const Color(0xFFF8FAFC),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF2F3A8F), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: Colors.red.shade200, width: 1.5),
       ),
     );
   }

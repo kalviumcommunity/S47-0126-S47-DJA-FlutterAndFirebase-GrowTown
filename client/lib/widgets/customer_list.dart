@@ -110,55 +110,121 @@ class _CustomerListState extends State<CustomerList> {
         return Column(
           children: [
             // 🔍 Search + Filter + View Toggle
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: "Search by name or phone",
-                      filled: true,
-                      fillColor: const Color(0xFFF4F6FA),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onChanged: (v) => setState(() => _searchQuery = v),
+            if (isMobile) ...[
+              TextField(
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  hintText: "Search by name or phone",
+                  hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade400),
+                  filled: true,
+                  fillColor: const Color(0xFFF4F6FA),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                 ),
-                const SizedBox(width: 12),
-                DropdownButton<String>(
-                  value: _filter,
-                  items: const [
-                    DropdownMenuItem(value: 'All', child: Text('All')),
-                    DropdownMenuItem(
-                        value: 'Points > 50', child: Text('Points > 50')),
-                    DropdownMenuItem(
-                        value: 'Points > 100', child: Text('Points > 100')),
-                    DropdownMenuItem(value: 'Active', child: Text('Active')),
-                    DropdownMenuItem(
-                        value: 'Inactive', child: Text('Inactive')),
-                    DropdownMenuItem(
-                      value: 'High value',
-                      child: Text('High value (top)'),
+                onChanged: (v) => setState(() => _searchQuery = v),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F6FA),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _filter,
+                          isExpanded: true,
+                          icon: const Icon(Icons.filter_list, size: 20),
+                          style: const TextStyle(fontSize: 14, color: Colors.black87),
+                          items: const [
+                            DropdownMenuItem(value: 'All', child: Text('All')),
+                            DropdownMenuItem(value: 'Points > 50', child: Text('Points > 50')),
+                            DropdownMenuItem(value: 'Points > 100', child: Text('Points > 100')),
+                            DropdownMenuItem(value: 'Active', child: Text('Active')),
+                            DropdownMenuItem(value: 'Inactive', child: Text('Inactive')),
+                            DropdownMenuItem(value: 'High value', child: Text('High value (top)')),
+                          ],
+                          onChanged: (v) => setState(() => _filter = v!),
+                        ),
+                      ),
                     ),
-                  ],
-                  onChanged: (v) => setState(() => _filter = v!),
-                ),
-                const SizedBox(width: 12),
-                IconButton(
-                  icon: Icon(Icons.view_list,
-                      color: !_isGrid ? Colors.blue : Colors.grey),
-                  onPressed: () => setState(() => _isGrid = false),
-                ),
-                IconButton(
-                  icon: Icon(Icons.grid_view,
-                      color: _isGrid ? Colors.blue : Colors.grey),
-                  onPressed: () => setState(() => _isGrid = true),
-                ),
-              ],
-            ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: !_isGrid ? const Color(0xFF2F3A8F) : const Color(0xFFF4F6FA),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.view_list, size: 20,
+                          color: !_isGrid ? Colors.white : Colors.grey),
+                      onPressed: () => setState(() => _isGrid = false),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: _isGrid ? const Color(0xFF2F3A8F) : const Color(0xFFF4F6FA),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.grid_view, size: 20,
+                          color: _isGrid ? Colors.white : Colors.grey),
+                      onPressed: () => setState(() => _isGrid = true),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.search),
+                        hintText: "Search by name or phone",
+                        filled: true,
+                        fillColor: const Color(0xFFF4F6FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: (v) => setState(() => _searchQuery = v),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  DropdownButton<String>(
+                    value: _filter,
+                    items: const [
+                      DropdownMenuItem(value: 'All', child: Text('All')),
+                      DropdownMenuItem(value: 'Points > 50', child: Text('Points > 50')),
+                      DropdownMenuItem(value: 'Points > 100', child: Text('Points > 100')),
+                      DropdownMenuItem(value: 'Active', child: Text('Active')),
+                      DropdownMenuItem(value: 'Inactive', child: Text('Inactive')),
+                      DropdownMenuItem(value: 'High value', child: Text('High value (top)')),
+                    ],
+                    onChanged: (v) => setState(() => _filter = v!),
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    icon: Icon(Icons.view_list,
+                        color: !_isGrid ? Colors.blue : Colors.grey),
+                    onPressed: () => setState(() => _isGrid = false),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.grid_view,
+                        color: _isGrid ? Colors.blue : Colors.grey),
+                    onPressed: () => setState(() => _isGrid = true),
+                  ),
+                ],
+              ),
+            ],
 
             const SizedBox(height: 16),
 
@@ -210,7 +276,7 @@ class _CustomerListState extends State<CustomerList> {
                             crossAxisCount: gridColumns,
                             crossAxisSpacing: isMobile ? 12 : 16,
                             mainAxisSpacing: isMobile ? 12 : 16,
-                            childAspectRatio: isMobile ? 1.1 : 1.3,
+                            childAspectRatio: isMobile ? 1.15 : 1.3,
                           ),
                           itemCount: filtered.length,
                           itemBuilder: (context, index) {
@@ -227,50 +293,73 @@ class _CustomerListState extends State<CustomerList> {
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               child: Row(
                                 children: [
-                                  Expanded(child: Text(c.name)),
-                                  Expanded(child: Text(c.phone)),
+                                  Expanded(child: Text(c.name, overflow: TextOverflow.ellipsis)),
+                                  Expanded(child: Text(c.phone, overflow: TextOverflow.ellipsis)),
                                   Expanded(
-                                    child: Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove,
-                                              size: 18),
-                                          tooltip: 'Decrease points',
-                                          onPressed: canEdit && c.points > 0
-                                              ? () => _updatePoints(c, -1)
-                                              : null,
-                                        ),
-                                        Text('${c.points}'),
-                                        IconButton(
-                                          icon: const Icon(Icons.add, size: 18),
-                                          tooltip: 'Increase points',
-                                          onPressed: canEdit && c.points < 1000
-                                              ? () => _updatePoints(c, 1)
-                                              : null,
-                                        ),
-                                      ],
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            width: 32,
+                                            height: 32,
+                                            child: IconButton(
+                                              icon: const Icon(Icons.remove, size: 16),
+                                              padding: EdgeInsets.zero,
+                                              tooltip: 'Decrease points',
+                                              onPressed: canEdit && c.points > 0
+                                                  ? () => _updatePoints(c, -1)
+                                                  : null,
+                                            ),
+                                          ),
+                                          Text('${c.points}'),
+                                          SizedBox(
+                                            width: 32,
+                                            height: 32,
+                                            child: IconButton(
+                                              icon: const Icon(Icons.add, size: 16),
+                                              padding: EdgeInsets.zero,
+                                              tooltip: 'Increase points',
+                                              onPressed: canEdit && c.points < 1000
+                                                  ? () => _updatePoints(c, 1)
+                                                  : null,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   Expanded(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Chip(
-                                          label: Text(c.status),
-                                          backgroundColor: c.status == 'active'
-                                              ? Colors.green[100]
-                                              : Colors.grey[300],
-                                        ),
-                                        IconButton(
-                                          icon:
-                                              const Icon(Icons.edit, size: 18),
-                                          tooltip: 'Edit points',
-                                          onPressed: canEdit
-                                              ? () => _editPoints(context, c)
-                                              : null,
-                                        ),
-                                      ],
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Chip(
+                                            label: Text(c.status, style: const TextStyle(fontSize: 12)),
+                                            backgroundColor: c.status == 'active'
+                                                ? Colors.green[100]
+                                                : Colors.grey[300],
+                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            padding: EdgeInsets.zero,
+                                          ),
+                                          SizedBox(
+                                            width: 32,
+                                            height: 32,
+                                            child: IconButton(
+                                              icon: const Icon(Icons.edit, size: 16),
+                                              padding: EdgeInsets.zero,
+                                              tooltip: 'Edit points',
+                                              onPressed: canEdit
+                                                  ? () => _editPoints(context, c)
+                                                  : null,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -288,54 +377,196 @@ class _CustomerListState extends State<CustomerList> {
   // 🧩 Grid Card UI
   Widget _gridCustomerCard(Customer c) {
     final canEdit = c.id.isNotEmpty;
+    final isActive = c.status == 'active';
+    // Generate a color from the customer name for the avatar
+    final avatarColors = [
+      const Color(0xFF2F3A8F),
+      const Color(0xFF6C5CE7),
+      const Color(0xFF00B894),
+      const Color(0xFFE17055),
+      const Color(0xFF0984E3),
+      const Color(0xFFFD79A8),
+    ];
+    final colorIndex = c.name.isNotEmpty ? c.name.codeUnitAt(0) % avatarColors.length : 0;
+    final avatarColor = avatarColors[colorIndex];
+
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F6FA),
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFFEEF2FF),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundColor: Colors.blue,
-            child: Text(
-              c.name.isNotEmpty ? c.name[0] : '?',
-              style: const TextStyle(color: Colors.white),
+          // Top section with gradient header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [avatarColor, avatarColor.withOpacity(0.7)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
+              ),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.white.withOpacity(0.25),
+                  child: Text(
+                    c.name.isNotEmpty ? c.name[0].toUpperCase() : '?',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        c.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(Icons.phone, size: 12, color: Colors.white70),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              c.phone,
+                              style: const TextStyle(color: Colors.white70, fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(c.phone, style: const TextStyle(color: Colors.black54)),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+
+          // Middle: Points + Status
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove, size: 18),
-                    tooltip: 'Decrease points',
-                    onPressed: canEdit && c.points > 0
-                        ? () => _updatePoints(c, -1)
-                        : null,
+                  // Status chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isActive ? const Color(0xFFE8F5E9) : const Color(0xFFEEEEEE),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isActive ? Icons.circle : Icons.circle_outlined,
+                          size: 8,
+                          color: isActive ? Colors.green : Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isActive ? 'Active' : 'Inactive',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isActive ? Colors.green.shade700 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  Text("${c.points} pts"),
-                  IconButton(
-                    icon: const Icon(Icons.add, size: 18),
-                    tooltip: 'Increase points',
-                    onPressed: canEdit && c.points < 1000
-                        ? () => _updatePoints(c, 1)
-                        : null,
+                  const SizedBox(height: 8),
+                  // Points row
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0EDFF),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${c.points} pts',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Color(0xFF2F3A8F),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: IconButton(
+                          icon: const Icon(Icons.remove_circle_outline, size: 18),
+                          padding: EdgeInsets.zero,
+                          color: Colors.red.shade300,
+                          tooltip: 'Decrease points',
+                          onPressed: canEdit && c.points > 0
+                              ? () => _updatePoints(c, -1)
+                              : null,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: IconButton(
+                          icon: const Icon(Icons.add_circle_outline, size: 18),
+                          padding: EdgeInsets.zero,
+                          color: Colors.green.shade400,
+                          tooltip: 'Increase points',
+                          onPressed: canEdit && c.points < 1000
+                              ? () => _updatePoints(c, 1)
+                              : null,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 16),
+                          padding: EdgeInsets.zero,
+                          color: Colors.blueGrey,
+                          tooltip: 'Edit points',
+                          onPressed: canEdit
+                              ? () => _editPoints(context, c)
+                              : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              Chip(
-                label: Text(c.status),
-                backgroundColor:
-                    c.status == 'active' ? Colors.green[100] : Colors.grey[300],
-              ),
-            ],
           ),
         ],
       ),

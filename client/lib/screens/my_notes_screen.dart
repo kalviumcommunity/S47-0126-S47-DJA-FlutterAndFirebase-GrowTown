@@ -12,89 +12,170 @@ class MyNotesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final NotesService notesService = NotesService();
+    // Pastel colors for notes
+    final List<Color> noteColors = [
+      const Color(0xFFFFF8E1), // Amber/Yellow
+      const Color(0xFFE3F2FD), // Light Blue
+      const Color(0xFFF3E5F5), // Light Purple
+      const Color(0xFFE8F5E9), // Light Green
+      const Color(0xFFFFEBEE), // Light Red
+      const Color(0xFFE0F7FA), // Cyan
+    ];
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
-        title: const Text('My Notes'),
+        title: const Text(
+          'My Notes',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: notesService.getNotesStream(),
         builder: (context, snapshot) {
-          // ── Loading state ───────────────────────────────────────────────
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // ── Error state ─────────────────────────────────────────────────
           if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Something went wrong',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    snapshot.error.toString(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                ],
-              ),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          // ── Empty state ─────────────────────────────────────────────────
           final docs = snapshot.data?.docs ?? [];
+
           if (docs.isEmpty) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.note_add_outlined,
-                      size: 64, color: Colors.grey[400]),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        )
+                      ],
+                    ),
+                    child: Icon(Icons.note_alt_outlined,
+                        size: 48, color: Colors.grey.shade400),
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'No notes yet',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Tap the + button to create your first note',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                    'Tap the + button to add one',
+                    style: TextStyle(color: Colors.grey.shade500),
                   ),
                 ],
               ),
             );
           }
 
-          // ── Notes list ──────────────────────────────────────────────────
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
             itemCount: docs.length,
             itemBuilder: (context, index) {
               final note = Note.fromFirestore(docs[index]);
-              return _NoteCard(
-                note: note,
+              final color = noteColors[index % noteColors.length];
+
+              return GestureDetector(
                 onTap: () => _openEditScreen(context, note),
-                onDelete: () => _confirmDelete(context, notesService, note),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        note.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Divider(color: Colors.black.withOpacity(0.05), height: 1),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: Text(
+                          note.content,
+                          maxLines: 6,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.4,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                            onTap: () => _confirmDelete(context, notesService, note),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.5),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.delete_outline,
+                                  size: 18, color: Colors.grey.shade700),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           );
         },
       ),
-
-      // ── FAB to create a new note ─────────────────────────────────────
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openAddScreen(context),
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF2F3A8F),
+        elevation: 4,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

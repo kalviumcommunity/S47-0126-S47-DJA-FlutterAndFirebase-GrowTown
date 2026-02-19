@@ -5,27 +5,59 @@ class AnalyticsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 800;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Analytics'),
-        backgroundColor: const Color(0xFF2F3A8F),
-        foregroundColor: Colors.white,
-      ),
       backgroundColor: const Color(0xFFF4F6FA),
+      appBar: AppBar(
+        title: const Text(
+          'Analytics',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(isMobile ? 16 : 24),
-          child: const Text(
-            'Analytics - Coming soon',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2F3A8F),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Icon(Icons.bar_chart_rounded,
+                  size: 64, color: Colors.indigo.shade300),
             ),
-            textAlign: TextAlign.center,
-          ),
+            const SizedBox(height: 24),
+            Text(
+              'Analytics Dashboard',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Detailed insights coming soon.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
         ),
       ),
     );
