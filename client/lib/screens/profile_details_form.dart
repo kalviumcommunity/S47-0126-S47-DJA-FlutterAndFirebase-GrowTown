@@ -1,6 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileDetailsForm extends StatefulWidget {
   const ProfileDetailsForm({super.key});
@@ -20,6 +20,17 @@ class _ProfileDetailsFormState extends State<ProfileDetailsForm> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill email from Firebase Auth (read-only)
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.email != null) {
+      _emailController.text = user.email!;
+    }
+  }
 
   @override
   void dispose() {
@@ -87,65 +98,25 @@ class _ProfileDetailsFormState extends State<ProfileDetailsForm> {
 
   // ───────────────────── Submit ─────────────────────
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Form is valid — show success feedback
+      setState(() => _isSaving = true);
+      
+      // Simulate network delay for effect
+      await Future.delayed(const Duration(seconds: 1));
+      
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 12),
-              Text('Profile saved successfully!'),
-            ],
-          ),
-          backgroundColor: Color(0xFF1F8F88),
+          content: Text('Profile saved successfully!'),
+          backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 3),
         ),
       );
 
-      // Show a confirmation dialog
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Color(0xFF1F8F88), size: 28),
-              SizedBox(width: 10),
-              Text('Success'),
-            ],
-          ),
-          content: Text(
-            'Profile details for ${_fullNameController.text.trim()} '
-            'have been saved successfully!',
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1F8F88),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                _formKey.currentState!.reset();
-                _fullNameController.clear();
-                _emailController.clear();
-                _phoneController.clear();
-                _passwordController.clear();
-                _confirmPasswordController.clear();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      setState(() => _isSaving = false);
+      Navigator.pop(context);
     }
   }
 
@@ -153,195 +124,227 @@ class _ProfileDetailsFormState extends State<ProfileDetailsForm> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 800;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F4F1),
+      backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
-        title: const Text('Profile Details Form'),
-        backgroundColor: const Color(0xFF1F8F88),
-        foregroundColor: Colors.white,
+        title: const Text(
+          'Edit Profile',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+        ),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            padding: EdgeInsets.all(isMobile ? 20 : 32),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                children: [
+                   Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Header ──
-                      const Icon(
-                        Icons.person_add_alt_1,
-                        size: 48,
-                        color: Color(0xFF1F8F88),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Profile Details',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge!
-                            .copyWith(
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Update Your Information',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: const Color(0xFF1F8F88),
+                              color: Colors.grey.shade800,
                             ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Fill in the details below to save your profile',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(color: Colors.black54),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 28),
+                          ),
+                          const SizedBox(height: 32),
 
-                      // ── Full Name ──
-                      TextFormField(
-                        controller: _fullNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Full Name',
-                          hintText: 'e.g. John Doe',
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
-                        textCapitalization: TextCapitalization.words,
-                        textInputAction: TextInputAction.next,
-                        validator: _validateFullName,
-                      ),
-                      const SizedBox(height: 16),
+                          _buildLabel("Full Name"),
+                          TextFormField(
+                            controller: _fullNameController,
+                            decoration: _inputDecoration("Enter full name", Icons.person_outline_rounded),
+                            validator: _validateFullName,
+                          ),
+                          const SizedBox(height: 20),
 
-                      // ── Email ──
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          hintText: 'e.g. john@example.com',
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        validator: _validateEmail,
-                      ),
-                      const SizedBox(height: 16),
+                          _buildLabel("Email Address"),
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: _inputDecoration("Enter email", Icons.email_outlined),
+                            validator: _validateEmail,
+                            readOnly: true, // Email usually read-only
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                          const SizedBox(height: 20),
 
-                      // ── Phone Number ──
-                      TextFormField(
-                        controller: _phoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone Number',
-                          hintText: 'e.g. 9876543210',
-                          prefixIcon: Icon(Icons.phone_outlined),
-                        ),
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
+                          _buildLabel("Phone Number"),
+                          TextFormField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: _inputDecoration("Enter phone number", Icons.phone_outlined),
+                            validator: _validatePhone,
+                          ),
+                          const SizedBox(height: 20),
+
+                          _buildLabel("Password"),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: _inputDecoration("Enter password", Icons.lock_outline_rounded).copyWith(
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              ),
+                            ),
+                            validator: _validatePassword,
+                          ),
+                          const SizedBox(height: 20),
+
+                          _buildLabel("Confirm Password"),
+                          TextFormField(
+                            controller: _confirmPasswordController,
+                            obscureText: _obscureConfirmPassword,
+                            decoration: _inputDecoration("Confirm password", Icons.lock_outline_rounded).copyWith(
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                              ),
+                            ),
+                            validator: _validateConfirmPassword,
+                          ),
+                          const SizedBox(height: 40),
+
+                          // Save Button
+                          SizedBox(
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: _isSaving ? null : _submitForm,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF2F3A8F),
+                                      Color(0xFF5C6BC0)
+                                    ],
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF2F3A8F)
+                                          .withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child: _isSaving
+                                      ? const SizedBox(
+                                          height: 24,
+                                          width: 24,
+                                          child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2),
+                                        )
+                                      : const Text(
+                                          'Save Changes',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
-                        textInputAction: TextInputAction.next,
-                        validator: _validatePhone,
                       ),
-                      const SizedBox(height: 16),
-
-                      // ── Password ──
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          hintText: 'Minimum 8 characters',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                        ),
-                        obscureText: _obscurePassword,
-                        textInputAction: TextInputAction.next,
-                        validator: _validatePassword,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // ── Confirm Password ──
-                      TextFormField(
-                        controller: _confirmPasswordController,
-                        decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          hintText: 'Re-enter your password',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureConfirmPassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureConfirmPassword =
-                                    !_obscureConfirmPassword;
-                              });
-                            },
-                          ),
-                        ),
-                        obscureText: _obscureConfirmPassword,
-                        textInputAction: TextInputAction.done,
-                        validator: _validateConfirmPassword,
-                      ),
-                      const SizedBox(height: 28),
-
-                      // ── Submit Button ──
-                      SizedBox(
-                        height: 50,
-                        child: ElevatedButton.icon(
-                          onPressed: _submitForm,
-                          icon: const Icon(Icons.save),
-                          label: const Text(
-                            'Save Profile',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1F8F88),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.black54,
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, color: Colors.grey.shade400, size: 22),
+      filled: true,
+      fillColor: const Color(0xFFF8FAFC),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF2F3A8F), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: Colors.red.shade200, width: 1.5),
       ),
     );
   }
